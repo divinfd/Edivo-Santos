@@ -98,10 +98,11 @@ export default function (r) {
     const u = await q1("SELECT id FROM usuarios WHERE email = $1 AND status = 'ativo'", [email]);
     if (!u) falha(400, 'Código inválido ou expirado.');
     const rec = await q1(
-      'SELECT id FROM recuperacao_senha WHERE usuario_id = $1 AND codigo_hash = $2 AND NOT usado AND expira_em > now() ORDER BY id DESC LIMIT 1',
+      'SELECT id FROM recuperacao_senha WHERE usuario_id = $1 AND codigo_hash = $2 AND NOT usado AND tentativas < 5 AND expira_em > now() ORDER BY id DESC LIMIT 1',
       [u.id, sha256(u.id + ':' + codigo)],
     );
     if (!rec) {
+      await q('UPDATE recuperacao_senha SET tentativas = tentativas + 1 WHERE usuario_id = $1 AND NOT usado AND expira_em > now()', [u.id]);
       await auditar(u, 'redefinicao_falhou', null, ip);
       falha(400, 'Código inválido ou expirado.');
     }
