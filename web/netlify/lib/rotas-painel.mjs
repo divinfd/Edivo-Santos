@@ -63,7 +63,7 @@ async function exigeArquivo(u, id, escrita) {
   if (u.papel === 'admin' || f.criado_por === u.id) return f;
   if (!escrita) {
     const ok = await q1(
-      `SELECT 1 FROM atividades a WHERE a.arquivo_id = $1 AND (a.criado_por = $2 OR EXISTS (
+      `SELECT 1 FROM atividades a WHERE a.arquivo_id = $1 AND (a.para_todos OR a.criado_por = $2 OR EXISTS (
          SELECT 1 FROM atividade_grupos ag WHERE ag.atividade_id = a.id AND ag.grupo_id = ANY($3::int[]))) LIMIT 1`,
       [f.id, u.id, await gruposVisiveis(u)],
     );
