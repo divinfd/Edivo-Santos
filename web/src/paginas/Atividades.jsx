@@ -148,7 +148,7 @@ export function AtividadeEditor() {
         <label>Apresentação / orientações para o jovem</label><textarea value={a.descricao || ''} onChange={(e) => set('descricao', e.target.value)} />
         <div className="linha">
           <div><label>Categoria</label><select value={a.categoria || categorias[0] || ''} onChange={(e) => set('categoria', e.target.value)}>{categorias.map((c) => <option key={c}>{c}</option>)}</select></div>
-          <div><label>Publicar a partir de</label><input type="datetime-local" value={local(a.publicar_em)} onChange={(e) => set('publicar_em', new Date(e.target.value).toISOString())} /></div>
+          <div><label>Publicar a partir de</label><input type="datetime-local" value={local(a.publicar_em)} onChange={(e) => { const d = new Date(e.target.value); if (!isNaN(d)) set('publicar_em', d.toISOString()); }} /></div>
           <div><label>Prazo (opcional)</label><input type="date" value={a.prazo || ''} onChange={(e) => set('prazo', e.target.value)} /></div>
         </div>
         <div className="linha">
