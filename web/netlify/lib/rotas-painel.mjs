@@ -324,6 +324,7 @@ export default function (r) {
     const t = texto(body.texto, 5000);
     if (!t) falha(400, 'Escreva a observação.');
     const respostaId = Number(body.resposta_id) || null;
+    if (respostaId && !(await q1('SELECT 1 FROM respostas WHERE id = $1 AND usuario_id = $2', [respostaId, params.id]))) falha(404, 'Resposta não encontrada.');
     const o = await q1('INSERT INTO observacoes (jovem_id, autor_id, resposta_id, texto) VALUES ($1,$2,$3,$4) RETURNING id, texto, criado_em, resposta_id', [params.id, u.id, respostaId, t]);
     await auditar(u, 'observacao_registrada', { jovem: Number(params.id) }, ip);
     return json({ ...o, autor: u.nome }, 201);
