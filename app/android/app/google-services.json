@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1070632415665",
+    "project_id": "es-messenger-8d377",
+    "storage_bucket": "es-messenger-8d377.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1070632415665:android:833cef3ebd3c6fae1d0d90",
+        "android_client_info": {
+          "package_name": "com.edivo.esmessenger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfbD2ZaeE4WrSU0zX4_1k8K-XJshhcSac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1070632415665:android:824d00039798a7c11d0d90",
+        "android_client_info": {
+          "package_name": "com.hermanasguanelianas.vocacional"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfbD2ZaeE4WrSU0zX4_1k8K-XJshhcSac"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
