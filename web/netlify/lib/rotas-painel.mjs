@@ -774,8 +774,9 @@ export default function (r) {
 
   // ---------- NOTIFICAÇÕES ----------
   r('GET', '/painel/notificacoes', async ({ req }) => {
-    await equipe(req);
-    return json(await q('SELECT n.*, u.nome AS enviada_por_nome FROM notificacoes n LEFT JOIN usuarios u ON u.id = n.enviada_por ORDER BY n.criada_em DESC LIMIT 200'));
+    const u = await equipe(req);
+    const meu = u.papel === 'admin' ? '' : 'WHERE n.enviada_por = $1';
+    return json(await q(`SELECT n.*, u.nome AS enviada_por_nome FROM notificacoes n LEFT JOIN usuarios u ON u.id = n.enviada_por ${meu} ORDER BY n.criada_em DESC LIMIT 200`, meu ? [u.id] : []));
   });
 
   r('POST', '/painel/notificacoes', async ({ req, body, ip }) => {
