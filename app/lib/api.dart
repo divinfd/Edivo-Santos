@@ -137,7 +137,7 @@ class Api {
     return (jsonDecode(p.getString('fila') ?? '[]') as List).cast<Map<String, dynamic>>();
   }
 
-  static bool _meu(Map x) => x['dono'] == null || x['dono'] == usuario?['id'];
+  static bool _meu(Map x) => x['dono'] != null && x['dono'] == usuario?['id'];
 
   static Future<void> _contarPendentes() async => pendentes.value = (await _fila()).where(_meu).length;
 
@@ -170,7 +170,7 @@ class Api {
     }
   }
 
-  static Future<bool> estaPendente(String caminho) async => (await _fila()).any((x) => x['caminho'] == caminho);
+  static Future<bool> estaPendente(String caminho) async => (await _fila()).any((x) => _meu(x) && x['caminho'] == caminho);
 
   static Future<void> sincronizar() async {
     if (_sincronizando || token == null) return;
