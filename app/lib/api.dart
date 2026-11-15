@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 const baseSite = 'https://vocacional-guanelianas.netlify.app';
 const baseApi = '$baseSite/api';
@@ -30,12 +31,13 @@ class Api {
   static VoidCallback? aoExpirar;
   static final pendentes = ValueNotifier<int>(0);
   static bool _sincronizando = false;
+  static Future<void> _trava = Future.value();
 
   static Future<void> carregar() async {
     token = await _seguro.read(key: 'token');
     final u = await _seguro.read(key: 'usuario');
     if (u != null) usuario = jsonDecode(u);
-    pendentes.value = (await _fila()).length;
+    await _contarPendentes();
     Connectivity().onConnectivityChanged.listen((r) {
       if (!r.contains(ConnectivityResult.none)) sincronizar();
     });
@@ -46,6 +48,7 @@ class Api {
     usuario = u;
     await _seguro.write(key: 'token', value: t);
     await _seguro.write(key: 'usuario', value: jsonEncode(u));
+    await _contarPendentes();
   }
 
   static Future<void> limparSessao() async {
@@ -53,7 +56,9 @@ class Api {
     usuario = null;
     await _seguro.deleteAll();
     final p = await SharedPreferences.getInstance();
+    final fila = p.getString('fila');
     await p.clear();
+    if (fila != null) await p.setString('fila', fila);
     pendentes.value = 0;
     for (final d in [await getApplicationDocumentsDirectory(), await getTemporaryDirectory()]) {
       final pdfs = Directory('${d.path}/pdfs');
@@ -132,10 +137,21 @@ class Api {
     return (jsonDecode(p.getString('fila') ?? '[]') as List).cast<Map<String, dynamic>>();
   }
 
+  static bool _meu(Map x) => x['dono'] == null || x['dono'] == usuario?['id'];
+
+  static Future<void> _contarPendentes() async => pendentes.value = (await _fila()).where(_meu).length;
+
   static Future<void> _gravarFila(List<Map<String, dynamic>> f) async {
     final p = await SharedPreferences.getInstance();
     await p.setString('fila', jsonEncode(f));
-    pendentes.value = f.length;
+    pendentes.value = f.where(_meu).length;
+  }
+
+  /// Serializa leituras/escritas da fila para que envios simultâneos não se sobrescrevam.
+  static Future<T> _naFila<T>(Future<T> Function() f) {
+    final r = _trava.then((_) => f());
+    _trava = r.then((_) {}, onError: (_) {});
+    return r;
   }
 
   /// Envia agora; se não houver internet, guarda para enviar depois. Retorna true se já foi enviado.
@@ -145,9 +161,11 @@ class Api {
       return true;
     } on ErroApi catch (e) {
       if (!e.semRede) rethrow;
-      final f = await _fila();
-      f.add({'caminho': caminho, 'corpo': corpo, 'em': DateTime.now().toIso8601String()});
-      await _gravarFila(f);
+      await _naFila(() async {
+        final f = await _fila();
+        f.add({'id': const Uuid().v4(), 'dono': usuario?['id'], 'caminho': caminho, 'corpo': corpo, 'em': DateTime.now().toIso8601String()});
+        await _gravarFila(f);
+      });
       return false;
     }
   }
@@ -158,17 +176,20 @@ class Api {
     if (_sincronizando || token == null) return;
     _sincronizando = true;
     try {
-      var f = await _fila();
-      while (f.isNotEmpty) {
+      while (token != null) {
+        final item = (await _fila()).where(_meu).firstOrNull;
+        if (item == null) break;
         try {
-          await post(f.first['caminho'], f.first['corpo']);
+          await post(item['caminho'], item['corpo']);
         } on ErroApi catch (e) {
           if (e.semRede || e.status == 401 || e.status >= 500) break;
           // erro definitivo (ex.: atividade encerrada): descarta para não travar a fila
         }
-        f = await _fila();
-        if (f.isNotEmpty) f.removeAt(0);
-        await _gravarFila(f);
+        await _naFila(() async {
+          final f = await _fila();
+          f.removeWhere((x) => x['id'] == item['id'] && x['em'] == item['em']);
+          await _gravarFila(f);
+        });
       }
     } finally {
       _sincronizando = false;
