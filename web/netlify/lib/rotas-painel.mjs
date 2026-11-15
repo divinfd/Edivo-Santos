@@ -57,6 +57,21 @@ function validarPergunta(p, i) {
   return { id: Number(p.id) || null, texto: t, tipo, opcoes, obrigatoria: p.obrigatoria !== false, ordem: i };
 }
 
+async function exigeArquivo(u, id, escrita) {
+  const f = await q1('SELECT * FROM arquivos WHERE id = $1', [Number(id) || 0]);
+  if (!f) falha(404, 'Arquivo não encontrado.');
+  if (u.papel === 'admin' || f.criado_por === u.id) return f;
+  if (!escrita) {
+    const ok = await q1(
+      `SELECT 1 FROM atividades a WHERE a.arquivo_id = $1 AND (a.criado_por = $2 OR EXISTS (
+         SELECT 1 FROM atividade_grupos ag WHERE ag.atividade_id = a.id AND ag.grupo_id = ANY($3::int[]))) LIMIT 1`,
+      [f.id, u.id, await gruposVisiveis(u)],
+    );
+    if (ok) return f;
+  }
+  falha(404, 'Arquivo não encontrado.');
+}
+
 async function salvarAtividade(u, body, id = null) {
   const titulo = texto(body.titulo, 200);
   if (!titulo) falha(400, 'Informe o título.');
@@ -73,7 +88,7 @@ async function salvarAtividade(u, body, id = null) {
   if (isNaN(publicarEm)) falha(400, 'Data de publicação inválida.');
   const prazo = /^\d{4}-\d{2}-\d{2}$/.test(body.prazo || '') ? body.prazo : null;
   const arquivoId = Number(body.arquivo_id) || null;
-  if (arquivoId && !(await q1('SELECT id FROM arquivos WHERE id = $1 AND completo', [arquivoId]))) falha(400, 'O PDF ainda não terminou de ser enviado.');
+  if (arquivoId && !(await exigeArquivo(u, arquivoId, false)).completo) falha(400, 'O PDF ainda não terminou de ser enviado.');
   const perguntas = (Array.isArray(body.perguntas) ? body.perguntas : []).map(validarPergunta);
   const vals = [titulo, texto(body.descricao, 5000), categoria, texto(body.capa_key, 200) || null, arquivoId, publicarEm, prazo,
     bool(body.permitir_download), body.permitir_offline !== false, paraTodos];
@@ -447,9 +462,8 @@ export default function (r) {
   });
 
   r('PUT', '/painel/arquivos/:id/partes/:n', async ({ req, params }) => {
-    await equipe(req);
-    const f = await q1('SELECT * FROM arquivos WHERE id = $1', [params.id]);
-    if (!f) falha(404, 'Arquivo não encontrado.');
+    const f = await exigeArquivo(await equipe(req), params.id, true);
+    if (f.completo) falha(400, 'Este PDF já foi concluído. Para trocar, envie um novo arquivo.');
     const n = Number(params.n);
     if (!Number.isInteger(n) || n < 0 || n >= f.partes) falha(400, 'Parte inválida.');
     const buf = await req.arrayBuffer();
@@ -460,9 +474,7 @@ export default function (r) {
   });
 
   r('POST', '/painel/arquivos/:id/concluir', async ({ req, params }) => {
-    await equipe(req);
-    const f = await q1('SELECT * FROM arquivos WHERE id = $1', [params.id]);
-    if (!f) falha(404, 'Arquivo não encontrado.');
+    const f = await exigeArquivo(await equipe(req), params.id, true);
     const { blobs } = await (await pdfs()).list({ prefix: `${f.id}/` });
     const tem = new Set(blobs.map((b) => b.key));
     for (let i = 0; i < f.partes; i++) if (!tem.has(`${f.id}/${i}`)) falha(400, `Falta a parte ${i + 1} do arquivo. Envie novamente.`);
@@ -471,8 +483,8 @@ export default function (r) {
   });
 
   r('GET', '/painel/arquivos/:id/partes/:n', async ({ req, params }) => {
-    await equipe(req);
-    const buf = await (await pdfs()).get(`${Number(params.id)}/${Number(params.n)}`, { type: 'arrayBuffer' });
+    const f = await exigeArquivo(await equipe(req), params.id, false);
+    const buf = await (await pdfs()).get(`${f.id}/${Number(params.n)}`, { type: 'arrayBuffer' });
     if (!buf) falha(404, 'Parte não encontrada.');
     return binario(buf, 'application/octet-stream', { 'cache-control': 'private, no-store' });
   });
