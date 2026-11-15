@@ -623,7 +623,7 @@ export default function (r) {
     );
     if (lista.length) {
       const itens = await q(
-        `SELECT ri.resposta_id, p.texto AS pergunta, p.tipo, ri.valor FROM resposta_itens ri JOIN perguntas p ON p.id = ri.pergunta_id
+        `SELECT ri.resposta_id, ri.pergunta_id, p.texto AS pergunta, p.tipo, ri.valor FROM resposta_itens ri JOIN perguntas p ON p.id = ri.pergunta_id
           WHERE ri.resposta_id = ANY($1::int[]) ORDER BY p.ordem, p.id`,
         [lista.map((l) => l.id)],
       );

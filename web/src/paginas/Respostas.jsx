@@ -43,9 +43,11 @@ export default function Respostas() {
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
   function linhas() {
-    const perguntas = [...new Set((lista || []).flatMap((r) => r.itens.map((i) => i.pergunta)))];
-    const cab = ['Jovem', 'Atividade', 'Categoria', 'Enviada em', ...perguntas, 'Comentário'];
-    const dados = (lista || []).map((r) => [r.jovem, r.atividade, r.categoria, fmtDataHora(r.enviada_em), ...perguntas.map((p) => valorTexto(r.itens.find((i) => i.pergunta === p)?.valor)), r.comentario || '']);
+    const perguntas = new Map();
+    for (const r of lista || []) for (const i of r.itens) if (!perguntas.has(i.pergunta_id)) perguntas.set(i.pergunta_id, i.pergunta);
+    const chaves = [...perguntas.keys()];
+    const cab = ['Jovem', 'Atividade', 'Categoria', 'Enviada em', ...chaves.map((k) => perguntas.get(k)), 'Comentário'];
+    const dados = (lista || []).map((r) => [r.jovem, r.atividade, r.categoria, fmtDataHora(r.enviada_em), ...chaves.map((k) => valorTexto(r.itens.find((i) => i.pergunta_id === k)?.valor)), r.comentario || '']);
     return { cab, dados };
   }
   async function excel() {
