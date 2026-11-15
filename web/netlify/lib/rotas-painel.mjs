@@ -90,6 +90,9 @@ async function salvarAtividade(u, body, id = null) {
   const arquivoId = Number(body.arquivo_id) || null;
   if (arquivoId && !(await exigeArquivo(u, arquivoId, false)).completo) falha(400, 'O PDF ainda não terminou de ser enviado.');
   const perguntas = (Array.isArray(body.perguntas) ? body.perguntas : []).map(validarPergunta);
+  const atuais = id ? await q('SELECT p.id, (SELECT count(*)::int FROM resposta_itens ri WHERE ri.pergunta_id = p.id) AS n FROM perguntas p WHERE atividade_id = $1', [id]) : [];
+  const manter = new Set(perguntas.filter((p) => p.id).map((p) => p.id));
+  if (atuais.some((a) => !manter.has(a.id) && a.n > 0)) falha(400, 'Não é possível remover uma pergunta que já recebeu respostas.');
   const vals = [titulo, texto(body.descricao, 5000), categoria, texto(body.capa_key, 200) || null, arquivoId, publicarEm, prazo,
     bool(body.permitir_download), body.permitir_offline !== false, paraTodos];
   if (id) {
@@ -107,14 +110,7 @@ async function salvarAtividade(u, body, id = null) {
   }
   await q('DELETE FROM atividade_grupos WHERE atividade_id = $1', [id]);
   for (const g of grupos) await q('INSERT INTO atividade_grupos (atividade_id, grupo_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [id, g]);
-  const atuais = await q('SELECT p.id, (SELECT count(*)::int FROM resposta_itens ri WHERE ri.pergunta_id = p.id) AS n FROM perguntas p WHERE atividade_id = $1', [id]);
-  const manter = new Set(perguntas.filter((p) => p.id).map((p) => p.id));
-  for (const a of atuais) {
-    if (!manter.has(a.id)) {
-      if (a.n > 0) falha(400, 'Não é possível remover uma pergunta que já recebeu respostas.');
-      await q('DELETE FROM perguntas WHERE id = $1', [a.id]);
-    }
-  }
+  for (const a of atuais) if (!manter.has(a.id)) await q('DELETE FROM perguntas WHERE id = $1', [a.id]);
   const idsAtuais = new Set(atuais.map((a) => a.id));
   for (const p of perguntas) {
     if (p.id && idsAtuais.has(p.id)) {
