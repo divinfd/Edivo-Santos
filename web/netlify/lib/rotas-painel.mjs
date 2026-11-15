@@ -302,6 +302,7 @@ export default function (r) {
     await exigeJovemVisivel(u, params.id);
     const senha = senhaTemporaria();
     await q('UPDATE usuarios SET senha_hash = $1 WHERE id = $2', [hashSenha(senha), params.id]);
+    await q('UPDATE recuperacao_senha SET usado = true WHERE usuario_id = $1', [params.id]);
     await q('DELETE FROM sessoes WHERE usuario_id = $1', [params.id]);
     await q('UPDATE recuperacao_senha SET atendido = true WHERE usuario_id = $1', [params.id]);
     await auditar(u, 'senha_jovem_redefinida', { jovem: Number(params.id) }, ip);
@@ -389,6 +390,7 @@ export default function (r) {
     if (!alvo) falha(404, 'Usuário não encontrado.');
     const senha = senhaTemporaria();
     await q('UPDATE usuarios SET senha_hash = $1 WHERE id = $2', [hashSenha(senha), params.id]);
+    await q('UPDATE recuperacao_senha SET usado = true WHERE usuario_id = $1', [params.id]);
     await q('DELETE FROM sessoes WHERE usuario_id = $1', [params.id]);
     await auditar(u, 'senha_equipe_redefinida', { usuario: Number(params.id) }, ip);
     return json({ senha_temporaria: senha });

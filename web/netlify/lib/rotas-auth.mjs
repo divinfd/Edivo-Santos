@@ -137,6 +137,7 @@ export default function (r) {
     if (!confereSenha(body.atual || '', atual.senha_hash)) falha(400, 'A senha atual está incorreta.');
     await q('UPDATE usuarios SET senha_hash = $1 WHERE id = $2', [hashSenha(validarSenha(body.nova)), u.id]);
     await q('DELETE FROM sessoes WHERE usuario_id = $1 AND token_hash <> $2', [u.id, u.token_hash]);
+    await q('UPDATE recuperacao_senha SET usado = true WHERE usuario_id = $1', [u.id]);
     await auditar(u, 'senha_alterada', null, ip);
     return json({ ok: true, mensagem: 'Senha alterada com sucesso.' });
   });
