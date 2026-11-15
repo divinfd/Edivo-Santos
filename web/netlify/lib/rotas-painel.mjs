@@ -861,7 +861,11 @@ export default function (r) {
   });
 
   r('POST', '/painel/recuperacoes/:usuario/atendido', async ({ req, params }) => {
-    await equipe(req);
+    const u = await equipe(req);
+    const alvo = await q1('SELECT papel FROM usuarios WHERE id = $1', [Number(params.usuario) || 0]);
+    if (!alvo) falha(404, 'Usuário não encontrado.');
+    if (alvo.papel === 'jovem') await exigeJovemVisivel(u, params.usuario);
+    else if (u.papel !== 'admin') falha(403, 'Somente administradores podem fazer isso.');
     await q('UPDATE recuperacao_senha SET atendido = true WHERE usuario_id = $1', [params.usuario]);
     return json({ ok: true });
   });
