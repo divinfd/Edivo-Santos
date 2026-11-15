@@ -580,11 +580,10 @@ export default function (r) {
     const n = await q1('SELECT count(*)::int AS n FROM respostas WHERE atividade_id = $1', [a.id]);
     if (n.n > 0) falha(400, 'Esta atividade já tem respostas. Use "Arquivar" para guardá-la.');
     await q('DELETE FROM atividades WHERE id = $1', [a.id]);
-    if (a.arquivo_id && !(await q1('SELECT 1 FROM atividades WHERE arquivo_id = $1 LIMIT 1', [a.arquivo_id]))) {
+    if (a.arquivo_id && (await q1('DELETE FROM arquivos f WHERE f.id = $1 AND NOT EXISTS (SELECT 1 FROM atividades WHERE arquivo_id = f.id) RETURNING id', [a.arquivo_id]))) {
       const loja = await pdfs();
       const { blobs } = await loja.list({ prefix: `${a.arquivo_id}/` });
       for (const b of blobs) await loja.delete(b.key);
-      await q('DELETE FROM arquivos WHERE id = $1', [a.arquivo_id]);
     }
     await auditar(u, 'atividade_excluida', { atividade: a.id, titulo: a.titulo }, ip);
     return json({ ok: true });
