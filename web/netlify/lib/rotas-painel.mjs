@@ -552,7 +552,7 @@ export default function (r) {
     let push = null;
     if (bool(body.notificar)) {
       if (new Date(a.publicar_em) <= new Date()) push = await enviarAvisoAtividade(u, a);
-      else await q('UPDATE atividades SET notificar = true WHERE id = $1', [a.id]);
+      else await q('UPDATE atividades SET notificar = true, notificado_em = NULL WHERE id = $1', [a.id]);
     }
     await auditar(u, 'atividade_publicada', { atividade: a.id, notificar: bool(body.notificar) }, ip);
     return json({ ok: true, push, agendada: new Date(a.publicar_em) > new Date() });
