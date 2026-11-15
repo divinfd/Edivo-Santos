@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../comum.dart';
+import '../idioma.dart';
 import '../push.dart';
 import 'conta.dart';
 import 'contato.dart';
@@ -74,10 +75,10 @@ class _TelaPrincipalEstado extends State<TelaPrincipal> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(_aba == 0 ? 'Vocacional Hermanas Guanelianas' : _titulos[_aba], style: TextStyle(fontSize: _aba == 0 ? 17 : 20)),
+        title: Text(_aba == 0 ? 'Vocacional Hermanas Guanelianas' : tr(_titulos[_aba]), style: TextStyle(fontSize: _aba == 0 ? 17 : 20)),
         actions: [
-          IconButton(tooltip: 'Avisos', icon: const Icon(Icons.notifications_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaAvisos()))),
-          IconButton(tooltip: 'Minha conta', icon: const Icon(Icons.account_circle_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaConta()))),
+          IconButton(tooltip: tr('Avisos'), icon: const Icon(Icons.notifications_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaAvisos()))),
+          IconButton(tooltip: tr('Minha conta'), icon: const Icon(Icons.account_circle_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaConta()))),
         ],
       ),
       body: Column(children: [
@@ -87,9 +88,9 @@ class _TelaPrincipalEstado extends State<TelaPrincipal> {
               ? const SizedBox.shrink()
               : MaterialBanner(
                   backgroundColor: const Color(0xFFFFF7E0),
-                  content: Text(n == 1 ? '1 envio aguardando internet. Ele será enviado automaticamente.' : '$n envios aguardando internet. Serão enviados automaticamente.'),
+                  content: Text(n == 1 ? tr('1 envio aguardando internet. Ele será enviado automaticamente.') : tr('{n} envios aguardando internet. Serão enviados automaticamente.', {'n': n})),
                   leading: const Icon(Icons.cloud_upload_outlined, color: dourado),
-                  actions: [TextButton(onPressed: Api.sincronizar, child: const Text('Tentar agora'))],
+                  actions: [TextButton(onPressed: Api.sincronizar, child: Text(tr('Tentar agora')))],
                 ),
         ),
         Expanded(child: paginas[_aba]),
@@ -97,12 +98,12 @@ class _TelaPrincipalEstado extends State<TelaPrincipal> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _aba,
         onDestinationSelected: irPara,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Início'),
-          NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: 'Liturgia'),
-          NavigationDestination(icon: Icon(Icons.self_improvement_outlined), selectedIcon: Icon(Icons.self_improvement), label: 'Oração'),
-          NavigationDestination(icon: Icon(Icons.edit_note_outlined), selectedIcon: Icon(Icons.edit_note), label: 'Feedback'),
-          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: 'Contato'),
+        destinations: [
+          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: tr('Início')),
+          NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: tr('Liturgia')),
+          NavigationDestination(icon: Icon(Icons.self_improvement_outlined), selectedIcon: Icon(Icons.self_improvement), label: tr('Oração')),
+          NavigationDestination(icon: Icon(Icons.edit_note_outlined), selectedIcon: Icon(Icons.edit_note), label: tr('Feedback')),
+          NavigationDestination(icon: Icon(Icons.forum_outlined), selectedIcon: Icon(Icons.forum), label: tr('Contato')),
         ],
       ),
     );
@@ -120,14 +121,16 @@ class _Inicio extends StatelessWidget {
       construir: (context, d, _) {
         final primeiro = (d['nome'] ?? '').toString().split(' ').first;
         final hora = DateTime.now().hour;
-        final saudacao = hora < 12 ? 'Bom dia' : (hora < 18 ? 'Boa tarde' : 'Boa noite');
+        final saudacao = hora < 12 ? tr('Bom dia') : (hora < 18 ? tr('Boa tarde') : tr('Boa noite'));
         final novas = (d['novas_atividades'] ?? 0) as int;
+        final mensagemEs = (d['mensagem_espiritual_es'] ?? '').toString();
+        final mensagem = emEspanhol && mensagemEs.isNotEmpty ? mensagemEs : tr((d['mensagem_espiritual'] ?? '').toString());
         final modulos = [
-          (Icons.menu_book, 'Liturgia diária', 'Leituras e Evangelho do dia', () => irPara(1)),
-          (Icons.self_improvement, 'Minha Oração', 'Orações e materiais para você', () => irPara(2)),
-          (Icons.diversity_3, 'Família Guanelliana', 'São Luís Guanella e o carisma', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaFamilia()))),
-          (Icons.edit_note, 'Meu Feedback', 'O que você partilhou', () => irPara(3)),
-          (Icons.forum, 'Contato', 'Fale com a equipe vocacional', () => irPara(4)),
+          (Icons.menu_book, tr('Liturgia diária'), tr('Leituras e Evangelho do dia'), () => irPara(1)),
+          (Icons.self_improvement, tr('Minha Oração'), tr('Orações e materiais para você'), () => irPara(2)),
+          (Icons.diversity_3, tr('Família Guanelliana'), tr('São Luís Guanella e o carisma'), () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaFamilia()))),
+          (Icons.edit_note, tr('Meu Feedback'), tr('O que você partilhou'), () => irPara(3)),
+          (Icons.forum, tr('Contato'), tr('Fale com a equipe vocacional'), () => irPara(4)),
         ];
         return ListView(padding: const EdgeInsets.all(16), children: [
           Container(
@@ -140,12 +143,12 @@ class _Inicio extends StatelessWidget {
               Text('$saudacao, $primeiro!', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
               Text(fmtDataLonga(DateTime.now()), style: const TextStyle(color: Colors.white70)),
-              if ((d['mensagem_espiritual'] ?? '').toString().isNotEmpty) ...[
+              if (mensagem.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Icon(Icons.format_quote, color: dourado),
                   const SizedBox(width: 6),
-                  Expanded(child: Text(d['mensagem_espiritual'], style: const TextStyle(color: Colors.white, fontSize: 16, fontStyle: FontStyle.italic, height: 1.35))),
+                  Expanded(child: Text(mensagem, style: const TextStyle(color: Colors.white, fontSize: 16, fontStyle: FontStyle.italic, height: 1.35))),
                 ]),
               ],
             ]),
@@ -155,7 +158,7 @@ class _Inicio extends StatelessWidget {
               color: const Color(0xFFFFF7E0),
               child: ListTile(
                 leading: const Icon(Icons.auto_awesome, color: dourado),
-                title: Text(novas == 1 ? 'Há 1 nova oração para você' : 'Há $novas novas orações para você'),
+                title: Text(novas == 1 ? tr('Há 1 nova oração para você') : tr('Há {n} novas orações para você', {'n': novas})),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => irPara(2),
               ),

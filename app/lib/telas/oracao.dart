@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../api.dart';
 import '../comum.dart';
+import '../idioma.dart';
 import '../pdf.dart';
 
 String rotuloStatus(Map a) {
@@ -46,10 +47,10 @@ class _TelaOracaoEstado extends State<TelaOracao> {
         }).toList();
         return ListView(padding: const EdgeInsets.all(16), children: [
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'Todas', label: Text('Todas')),
-              ButtonSegment(value: 'Pendentes', label: Text('Pendentes')),
-              ButtonSegment(value: 'Concluídas', label: Text('Concluídas')),
+            segments: [
+              ButtonSegment(value: 'Todas', label: Text(tr('Todas'))),
+              ButtonSegment(value: 'Pendentes', label: Text(tr('Pendentes'))),
+              ButtonSegment(value: 'Concluídas', label: Text(tr('Concluídas'))),
             ],
             selected: {_filtro},
             onSelectionChanged: (s) => setState(() => _filtro = s.first),
@@ -59,16 +60,16 @@ class _TelaOracaoEstado extends State<TelaOracao> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(top: 10),
               child: Row(children: [
-                Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(label: const Text('Todas as categorias'), selected: _categoria == null, onSelected: (_) => setState(() => _categoria = null))),
+                Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(label: Text(tr('Todas as categorias')), selected: _categoria == null, onSelected: (_) => setState(() => _categoria = null))),
                 for (final c in cats)
-                  Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(label: Text(c), selected: _categoria == c, onSelected: (_) => setState(() => _categoria = c))),
+                  Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(label: Text(tr(c)), selected: _categoria == c, onSelected: (_) => setState(() => _categoria = c))),
               ]),
             ),
           const SizedBox(height: 8),
           if (lista.isEmpty)
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 60),
-              child: Text('Nenhuma oração por aqui ainda.\nQuando a equipe publicar novos materiais, você será avisado.', textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
+              child: Text(tr('Nenhuma oração por aqui ainda.\nQuando a equipe publicar novos materiais, você será avisado.'), textAlign: TextAlign.center, style: TextStyle(color: Colors.black54)),
             ),
           for (final a in lista) _CartaoAtividade(a, aoVoltar: () => _chave.currentState?.recarregar()),
         ]);
@@ -101,7 +102,7 @@ class _CartaoAtividade extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(a['categoria'] ?? '', style: const TextStyle(color: dourado, fontSize: 12, fontWeight: FontWeight.w700)),
+                Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: dourado, fontSize: 12, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text(a['titulo'] ?? '', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
@@ -109,9 +110,9 @@ class _CartaoAtividade extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(color: corStatus(s).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-                    child: Text(s, style: TextStyle(color: corStatus(s), fontSize: 12, fontWeight: FontWeight.w700)),
+                    child: Text(tr(s), style: TextStyle(color: corStatus(s), fontSize: 12, fontWeight: FontWeight.w700)),
                   ),
-                  if (a['prazo'] != null && a['resposta_id'] == null) Text('Até ${fmtData(a['prazo'])}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                  if (a['prazo'] != null && a['resposta_id'] == null) Text(tr('Até {d}', {'d': fmtData(a['prazo'])}), style: const TextStyle(fontSize: 12, color: Colors.black54)),
                 ]),
               ]),
             ),
@@ -171,7 +172,7 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
         await Pdfs.remover(a['arquivo_id']);
       }
       setState(() { _guardado = guardar; _progresso = null; });
-      if (mounted) aviso(context, guardar ? 'Pronto! Você pode ler esta oração sem internet.' : 'Cópia removida do aparelho.');
+      if (mounted) aviso(context, guardar ? tr('Pronto! Você pode ler esta oração sem internet.') : tr('Cópia removida do aparelho.'));
     } catch (e) {
       setState(() => _progresso = null);
       if (mounted) aviso(context, '$e', erro: true);
@@ -190,7 +191,7 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
   Future<void> _concluir(Map a) async {
     final ok = await Api.enviarOuGuardar('/app/atividades/${a['id']}/progresso', {'status': 'concluida'});
     if (!mounted) return;
-    aviso(context, ok ? 'Oração marcada como concluída. Que Deus abençoe sua caminhada!' : 'Sem internet: vamos registrar assim que a conexão voltar.');
+    aviso(context, ok ? tr('Oração marcada como concluída. Que Deus abençoe sua caminhada!') : tr('Sem internet: vamos registrar assim que a conexão voltar.'));
     _chave.currentState?.recarregar();
   }
 
@@ -208,12 +209,12 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
             if (a['capa_key'] != null)
               ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.network(imagemUrl(a['capa_key']), height: 180, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox.shrink())),
             const SizedBox(height: 10),
-            Text(a['categoria'] ?? '', style: const TextStyle(color: dourado, fontWeight: FontWeight.w700)),
+            Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: dourado, fontWeight: FontWeight.w700)),
             Text(a['titulo'] ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: azulEscuro)),
             const SizedBox(height: 4),
             Text([
-              'Publicada em ${fmtData(a['publicar_em'])}',
-              if (a['prazo'] != null) 'partilhar até ${fmtData(a['prazo'])}',
+              tr('Publicada em {d}', {'d': fmtData(a['publicar_em'])}),
+              if (a['prazo'] != null) tr('partilhar até {d}', {'d': fmtData(a['prazo'])}),
             ].join(' · '), style: const TextStyle(color: Colors.black54)),
             if ((a['descricao'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(a['descricao'], style: const TextStyle(fontSize: 16, height: 1.45))),
             const SizedBox(height: 16),
@@ -221,27 +222,27 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
               if (_progresso != null) ...[LinearProgressIndicator(value: _progresso), const SizedBox(height: 8)],
               FilledButton.icon(
                 icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Abrir oração'),
+                label: Text(tr('Abrir oração')),
                 onPressed: _progresso != null ? null : () => _abrirPdf(a),
               ),
               if (a['permitir_offline'] == true)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Disponível sem internet'),
-                  subtitle: const Text('Guarda uma cópia neste aparelho'),
+                  title: Text(tr('Disponível sem internet')),
+                  subtitle: Text(tr('Guarda uma cópia neste aparelho')),
                   value: _guardado,
                   onChanged: _progresso != null ? null : (v) => _alternarOffline(a, v),
                 ),
               if (a['permitir_download'] == true)
-                TextButton.icon(icon: const Icon(Icons.share), label: const Text('Salvar ou compartilhar PDF'), onPressed: () => _compartilhar(a)),
+                TextButton.icon(icon: const Icon(Icons.share), label: Text(tr('Salvar ou compartilhar PDF')), onPressed: () => _compartilhar(a)),
             ],
             if (_pendente)
-              const Card(
+              Card(
                 color: Color(0xFFFFF7E0),
                 child: ListTile(
                   leading: Icon(Icons.cloud_upload_outlined, color: dourado),
-                  title: Text('Sua partilha está guardada no aparelho'),
-                  subtitle: Text('Ela será enviada automaticamente quando houver internet.'),
+                  title: Text(tr('Sua partilha está guardada no aparelho')),
+                  subtitle: Text(tr('Ela será enviada automaticamente quando houver internet.')),
                 ),
               )
             else if (a['resposta'] != null)
@@ -249,9 +250,9 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
             else if (perguntas.isNotEmpty)
               _Formulario(a, perguntas, aoEnviar: recarregar)
             else if (a['progresso'] != 'concluida')
-              OutlinedButton.icon(icon: const Icon(Icons.check_circle_outline), label: const Text('Marcar como concluída'), onPressed: () => _concluir(a))
+              OutlinedButton.icon(icon: const Icon(Icons.check_circle_outline), label: Text(tr('Marcar como concluída')), onPressed: () => _concluir(a))
             else
-              const ListTile(leading: Icon(Icons.check_circle, color: Colors.green), title: Text('Você concluiu esta oração.')),
+              ListTile(leading: Icon(Icons.check_circle, color: Colors.green), title: Text(tr('Você concluiu esta oração.'))),
           ]);
         },
       ),
@@ -268,13 +269,13 @@ class _RespostaEnviada extends StatelessWidget {
     final r = a['resposta'] as Map;
     final valores = {for (final i in (r['itens'] as List)) i['pergunta_id']: i['valor']};
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Titulo('Sua partilha (enviada em ${fmtDataHora(r['enviada_em'])})'),
+      Titulo(tr('Sua partilha (enviada em {d})', {'d': fmtDataHora(r['enviada_em'])})),
       for (final p in perguntas)
         Card(
           child: ListTile(title: Text(p['texto'], style: const TextStyle(fontWeight: FontWeight.w600)), subtitle: Text(valores[p['id']]?.toString() ?? '—')),
         ),
-      if ((r['comentario'] ?? '').toString().isNotEmpty) Card(child: ListTile(title: const Text('Comentário'), subtitle: Text(r['comentario']))),
-      const Padding(padding: EdgeInsets.only(top: 6), child: Text('Somente você e a equipe vocacional veem esta partilha.', style: TextStyle(color: Colors.black54))),
+      if ((r['comentario'] ?? '').toString().isNotEmpty) Card(child: ListTile(title: Text(tr('Comentário')), subtitle: Text(r['comentario']))),
+      Padding(padding: EdgeInsets.only(top: 6), child: Text(tr('Somente você e a equipe vocacional veem esta partilha.'), style: TextStyle(color: Colors.black54))),
     ]);
   }
 }
@@ -312,16 +313,16 @@ class _FormularioEstado extends State<_Formulario> {
             ChoiceChip(label: Text('$n'), selected: _v[id] == '$n', onSelected: (_) => setState(() => _v[id] = '$n')),
         ]);
       case 'texto_curto':
-        return TextField(onChanged: (x) => _v[id] = x, decoration: const InputDecoration(hintText: 'Sua resposta'));
+        return TextField(onChanged: (x) => _v[id] = x, decoration: InputDecoration(hintText: tr('Sua resposta')));
       default:
-        return TextField(onChanged: (x) => _v[id] = x, minLines: 4, maxLines: 10, decoration: const InputDecoration(hintText: 'Escreva com liberdade...'));
+        return TextField(onChanged: (x) => _v[id] = x, minLines: 4, maxLines: 10, decoration: InputDecoration(hintText: tr('Escreva com liberdade...')));
     }
   }
 
   Future<void> _enviar() async {
     for (final p in widget.perguntas) {
       if (p['obrigatoria'] == true && (_v[p['id']] ?? '').trim().isEmpty) {
-        aviso(context, 'Responda: "${p['texto']}"', erro: true);
+        aviso(context, tr('Responda: "{p}"').replaceAll('{p}', '${p['texto']}'), erro: true);
         return;
       }
     }
@@ -337,11 +338,11 @@ class _FormularioEstado extends State<_Formulario> {
         context: context,
         builder: (c) => AlertDialog(
           icon: Icon(enviado ? Icons.favorite : Icons.cloud_upload_outlined, color: dourado, size: 40),
-          title: Text(enviado ? 'Partilha recebida!' : 'Partilha guardada'),
+          title: Text(enviado ? tr('Partilha recebida!') : tr('Partilha guardada')),
           content: Text(enviado
-              ? 'Obrigado por partilhar sua oração. A equipe vocacional vai ler com carinho. Seguimos caminhando juntos!'
-              : 'Você está sem internet. Sua partilha ficou guardada no aparelho e será enviada automaticamente.'),
-          actions: [FilledButton(onPressed: () => Navigator.pop(c), child: const Text('Amém'))],
+              ? tr('Obrigado por partilhar sua oração. A equipe vocacional vai ler com carinho. Seguimos caminhando juntos!')
+              : tr('Você está sem internet. Sua partilha ficou guardada no aparelho e será enviada automaticamente.')),
+          actions: [FilledButton(onPressed: () => Navigator.pop(c), child: Text(tr('Amém')))],
         ),
       );
       await widget.aoEnviar();
@@ -354,8 +355,8 @@ class _FormularioEstado extends State<_Formulario> {
 
   @override
   Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Titulo('Partilhe sua oração'),
-        const Text('Responda com sinceridade. Não há respostas certas ou erradas. Somente a equipe vocacional verá.', style: TextStyle(color: Colors.black54)),
+        Titulo(tr('Partilhe sua oração')),
+        Text(tr('Responda com sinceridade. Não há respostas certas ou erradas. Somente a equipe vocacional verá.'), style: TextStyle(color: Colors.black54)),
         for (final p in widget.perguntas)
           Card(
             child: Padding(
@@ -363,7 +364,7 @@ class _FormularioEstado extends State<_Formulario> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 Text('${p['texto']}${p['obrigatoria'] == true ? ' *' : ''}', style: const TextStyle(fontWeight: FontWeight.w700)),
                 if (p['tipo'] == 'escala')
-                  Padding(padding: const EdgeInsets.only(top: 2), child: Text('Escolha um número (o menor é "pouco" e o maior é "muito")', style: TextStyle(color: Colors.grey.shade600, fontSize: 12))),
+                  Padding(padding: const EdgeInsets.only(top: 2), child: Text(tr('Escolha um número (o menor é "pouco" e o maior é "muito")'), style: TextStyle(color: Colors.grey.shade600, fontSize: 12))),
                 const SizedBox(height: 8),
                 _campo(p),
               ]),
@@ -372,11 +373,11 @@ class _FormularioEstado extends State<_Formulario> {
         Card(
           child: Padding(
             padding: const EdgeInsets.all(14),
-            child: TextField(controller: _comentario, minLines: 2, maxLines: 6, decoration: const InputDecoration(labelText: 'Algo mais que queira partilhar? (opcional)')),
+            child: TextField(controller: _comentario, minLines: 2, maxLines: 6, decoration: InputDecoration(labelText: tr('Algo mais que queira partilhar? (opcional)'))),
           ),
         ),
         const SizedBox(height: 8),
-        BotaoCarregando(ocupado: _ocupado, texto: 'Enviar minha partilha', aoTocar: _enviar),
+        BotaoCarregando(ocupado: _ocupado, texto: tr('Enviar minha partilha'), aoTocar: _enviar),
         const SizedBox(height: 24),
       ]);
 }

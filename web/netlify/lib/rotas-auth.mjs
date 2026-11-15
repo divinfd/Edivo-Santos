@@ -13,7 +13,7 @@ const perfil = (u) => ({
 export default function (r) {
   r('GET', '/publico/config', async () => {
     const c = await configCompleta();
-    return json({ nome_app: c.nome_app, mensagem_espiritual: c.mensagem_espiritual });
+    return json({ nome_app: c.nome_app, mensagem_espiritual: c.mensagem_espiritual, mensagem_espiritual_es: c.mensagem_espiritual_es });
   });
 
   r('POST', '/auth/login', async ({ body, ip }) => {

@@ -22,7 +22,7 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 | **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano. Os textos iniciais são rascunhos para as irmãs revisarem. |
 | **Liturgia diária** | Ver a liturgia de qualquer dia e corrigir manualmente (a correção prevalece sobre a fonte automática). |
 | **Equipe** *(admin)* | Cadastrar responsáveis e administradores, definir nova senha, desativar. |
-| **Configurações** *(admin)* | Nome do app, mensagem espiritual, dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
+| **Configurações** *(admin)* | Nome do app, mensagem espiritual (em português e em espanhol), dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
 | **Registros de acesso** *(admin)* | Auditoria de entradas e ações administrativas. |
 | **Minha conta** | Trocar a própria senha. |
 
@@ -38,3 +38,9 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 - As partilhas são vistas só pelo jovem e pela equipe autorizada; não existem rankings nem comparações.
 - Exclusão: o jovem pode pedir no app (Minha conta → Excluir minha conta); o administrador também pode excluir.
 - Não há publicidade nem uso dos dados para outros fins.
+
+## Idiomas do aplicativo
+- O app abre em **espanhol** (idioma principal) e o jovem pode trocar para **português** na tela de entrada ou em Minha conta → Idioma.
+- Os textos que a equipe escreve no painel (orações, perguntas, Família Guanelliana, avisos) aparecem como foram escritos.
+- As leituras da liturgia vêm da fonte brasileira, em português.
+- As notificações automáticas (nova oração, resposta da equipe) chegam no idioma escolhido no celular.

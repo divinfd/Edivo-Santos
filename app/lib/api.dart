@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'idioma.dart';
+
 const baseSite = 'https://vocacional-guanelianas.netlify.app';
 const baseApi = '$baseSite/api';
 
@@ -19,7 +21,7 @@ class ErroApi implements Exception {
   ErroApi(this.mensagem, [this.status = 0]);
   bool get semRede => status == 0;
   @override
-  String toString() => mensagem;
+  String toString() => tr(mensagem);
 }
 
 /// Cliente da API com sessão segura, cache para leitura offline
@@ -59,6 +61,7 @@ class Api {
     final fila = p.getString('fila');
     await p.clear();
     if (fila != null) await p.setString('fila', fila);
+    await p.setString('idioma', idioma.value);
     pendentes.value = 0;
     for (final d in [await getApplicationDocumentsDirectory(), await getTemporaryDirectory()]) {
       final pdfs = Directory('${d.path}/pdfs');
@@ -77,13 +80,13 @@ class Api {
       if (corpo != null) rq.body = jsonEncode(corpo);
       return await http.Response.fromStream(await rq.send().timeout(const Duration(seconds: 40)));
     } on Exception {
-      throw ErroApi('Sem conexão com a internet.');
+      throw ErroApi(tr('Sem conexão com a internet.'));
     }
   }
 
   static Future<void> _verificar(http.Response r) async {
     if (r.statusCode < 400) return;
-    String msg = 'Não foi possível concluir (erro ${r.statusCode}).';
+    String msg = tr('Não foi possível concluir (erro {n}).', {'n': r.statusCode});
     try {
       final d = jsonDecode(utf8.decode(r.bodyBytes));
       if (d is Map && d['erro'] != null) msg = d['erro'];

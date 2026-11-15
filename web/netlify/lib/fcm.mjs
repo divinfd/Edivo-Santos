@@ -86,11 +86,22 @@ export async function tokensDestino({ paraTodos, grupos = [], usuarios = [] }) {
   return linhas.map((l) => l.token);
 }
 
-export async function notificar({ titulo, corpo, paraTodos = false, grupos = [], usuarios = [], atividadeId = null, autor = null, dados = {} }) {
+async function separarPorIdioma(tokens) {
+  if (!tokens.length) return { es: [], pt: [] };
+  const linhas = await q('SELECT token, idioma FROM dispositivos WHERE token = ANY($1::text[])', [tokens]);
+  const pt = new Set(linhas.filter((l) => l.idioma === 'pt').map((l) => l.token));
+  return { es: tokens.filter((t) => !pt.has(t)), pt: tokens.filter((t) => pt.has(t)) };
+}
+
+export async function notificar({ titulo, corpo, tituloEs, corpoEs, paraTodos = false, grupos = [], usuarios = [], atividadeId = null, autor = null, dados = {} }) {
   const tokens = await tokensDestino({ paraTodos, grupos, usuarios });
   let res = { dispositivos: tokens.length, entregues: 0 };
   try {
-    res = await enviarPush(tokens, { titulo, corpo, dados: { ...dados, ...(atividadeId ? { atividade: atividadeId } : {}) } });
+    const d = { ...dados, ...(atividadeId ? { atividade: atividadeId } : {}) };
+    const { es, pt } = await separarPorIdioma(tokens);
+    const a = await enviarPush(pt, { titulo, corpo, dados: d });
+    const b = await enviarPush(es, { titulo: tituloEs || titulo, corpo: corpoEs || corpo, dados: d });
+    res = { dispositivos: a.dispositivos + b.dispositivos, entregues: a.entregues + b.entregues };
   } catch (e) {
     console.error('push', e);
   }

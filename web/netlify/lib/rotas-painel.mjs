@@ -126,6 +126,7 @@ async function enviarAvisoAtividade(u, a) {
   const grupos = (await q('SELECT grupo_id FROM atividade_grupos WHERE atividade_id = $1', [a.id])).map((g) => g.grupo_id);
   const res = await notificar({
     titulo: 'Uma nova oração foi publicada',
+    tituloEs: 'Se publicó una nueva oración',
     corpo: a.titulo,
     paraTodos: a.para_todos,
     grupos,
@@ -772,6 +773,7 @@ export default function (r) {
       await setConfig('nome_app', n);
     }
     if (body.mensagem_espiritual !== undefined) await setConfig('mensagem_espiritual', texto(body.mensagem_espiritual, 1000));
+    if (body.mensagem_espiritual_es !== undefined) await setConfig('mensagem_espiritual_es', texto(body.mensagem_espiritual_es, 1000));
     if (body.contato) {
       const c = {};
       for (const k of Object.keys(CONFIG_PADRAO.contato)) c[k] = texto(body.contato[k], k === 'apresentacao' || k === 'encontros' ? 4000 : 200);
@@ -840,7 +842,7 @@ export default function (r) {
     const t = texto(body.resposta, 4000);
     if (!t) falha(400, 'Escreva a resposta.');
     await q('UPDATE mensagens SET resposta = $1, respondida_em = now(), respondida_por = $2 WHERE id = $3', [t, u.id, m.id]);
-    await notificar({ titulo: 'Você recebeu uma resposta', corpo: t.length > 120 ? t.slice(0, 117) + '...' : t, usuarios: [m.usuario_id], autor: u, dados: { tipo: 'mensagem' } });
+    await notificar({ titulo: 'Você recebeu uma resposta', tituloEs: 'Recibiste una respuesta', corpo: t.length > 120 ? t.slice(0, 117) + '...' : t, usuarios: [m.usuario_id], autor: u, dados: { tipo: 'mensagem' } });
     await auditar(u, 'mensagem_respondida', { mensagem: m.id }, ip);
     return json({ ok: true });
   });

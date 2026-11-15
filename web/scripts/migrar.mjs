@@ -32,4 +32,8 @@ const m = await sql.query("SELECT 1 FROM config WHERE chave = 'mensagem_espiritu
 if (!m.length) {
   await sql.query("INSERT INTO config (chave, valor) VALUES ('mensagem_espiritual', $1)", [JSON.stringify('Você não está sozinho em sua caminhada. Deus caminha com você e nós também.')]);
 }
+const mes = await sql.query("SELECT 1 FROM config WHERE chave = 'mensagem_espiritual_es'");
+if (!mes.length) {
+  await sql.query("INSERT INTO config (chave, valor) VALUES ('mensagem_espiritual_es', $1)", [JSON.stringify('No estás solo en tu camino. Dios camina contigo y nosotros también.')]);
+}
 console.log('Pronto.');

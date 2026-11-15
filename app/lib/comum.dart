@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'api.dart';
+import 'idioma.dart';
 
 const azul = Color(0xFF1F4E8C);
 const azulEscuro = Color(0xFF163A69);
@@ -36,15 +37,15 @@ ThemeData tema() {
 DateTime? _data(dynamic s) => s == null ? null : DateTime.tryParse(s.toString())?.toLocal();
 String fmtData(dynamic s) {
   final d = _data(s);
-  return d == null ? '' : DateFormat('dd/MM/yyyy', 'pt_BR').format(d);
+  return d == null ? '' : DateFormat('dd/MM/yyyy', localeData).format(d);
 }
 
 String fmtDataHora(dynamic s) {
   final d = _data(s);
-  return d == null ? '' : DateFormat("dd/MM/yyyy 'às' HH:mm", 'pt_BR').format(d);
+  return d == null ? '' : DateFormat(emEspanhol ? "dd/MM/yyyy 'a las' HH:mm" : "dd/MM/yyyy 'às' HH:mm", localeData).format(d);
 }
 
-String fmtDataLonga(DateTime d) => DateFormat("EEEE, d 'de' MMMM 'de' y", 'pt_BR').format(d);
+String fmtDataLonga(DateTime d) => DateFormat("EEEE, d 'de' MMMM 'de' y", localeData).format(d);
 
 void aviso(BuildContext context, String msg, {bool erro = false}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: erro ? Colors.red.shade700 : azulEscuro));
@@ -101,7 +102,7 @@ class CarregadorEstado<T> extends State<Carregador<T>> {
             const SizedBox(height: 12),
             Text('$erro', textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: recarregar, child: const Text('Tentar novamente')),
+            OutlinedButton(onPressed: recarregar, child: Text(tr('Tentar novamente'))),
           ]),
         ),
       );
@@ -142,5 +143,22 @@ class BotaoCarregando extends StatelessWidget {
   Widget build(BuildContext context) => FilledButton(
         onPressed: ocupado ? null : aoTocar,
         child: ocupado ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5)) : Text(texto),
+      );
+}
+
+/// Escolha de idioma (Español / Português). Trocar reinicia as telas no novo idioma.
+class SeletorIdioma extends StatelessWidget {
+  final VoidCallback? aoMudar;
+  const SeletorIdioma({super.key, this.aoMudar});
+  @override
+  Widget build(BuildContext context) => SegmentedButton<String>(
+        showSelectedIcon: false,
+        style: const ButtonStyle(visualDensity: VisualDensity.compact),
+        segments: const [ButtonSegment(value: 'es', label: Text('Español')), ButtonSegment(value: 'pt', label: Text('Português'))],
+        selected: {idioma.value},
+        onSelectionChanged: (s) async {
+          await definirIdioma(s.first);
+          aoMudar?.call();
+        },
       );
 }

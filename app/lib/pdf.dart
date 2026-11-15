@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 
 import 'api.dart';
+import 'idioma.dart';
 import 'comum.dart';
 
 /// PDFs baixados em partes. Só ficam guardados no aparelho quando a atividade permite uso offline.
@@ -100,7 +101,7 @@ class _TelaPdfEstado extends State<TelaPdf> {
         controller: _c,
         onDocumentLoaded: (d) => setState(() => _total = d.pagesCount),
         onPageChanged: (p) => setState(() => _pagina = p),
-        onDocumentError: (e) => aviso(context, 'Não foi possível abrir o PDF.', erro: true),
+        onDocumentError: (e) => aviso(context, tr('Não foi possível abrir o PDF.'), erro: true),
       ),
       bottomNavigationBar: _total == 0
           ? null
@@ -110,13 +111,13 @@ class _TelaPdfEstado extends State<TelaPdf> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   IconButton(
-                    tooltip: 'Página anterior',
+                    tooltip: tr('Página anterior'),
                     icon: const Icon(Icons.chevron_left),
                     onPressed: _pagina > 1 ? () => _c.previousPage(duration: const Duration(milliseconds: 250), curve: Curves.easeOut) : null,
                   ),
-                  Text('Página $_pagina de $_total  ·  use dois dedos para ampliar', style: const TextStyle(fontSize: 13)),
+                  Text(tr('Página {a} de {b}  ·  use dois dedos para ampliar', {'a': _pagina, 'b': _total}), style: const TextStyle(fontSize: 13)),
                   IconButton(
-                    tooltip: 'Próxima página',
+                    tooltip: tr('Próxima página'),
                     icon: const Icon(Icons.chevron_right),
                     onPressed: _pagina < _total ? () => _c.nextPage(duration: const Duration(milliseconds: 250), curve: Curves.easeOut) : null,
                   ),

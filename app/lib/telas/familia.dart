@@ -4,6 +4,7 @@ import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../api.dart';
 import '../comum.dart';
+import '../idioma.dart';
 
 class TelaFamilia extends StatelessWidget {
   const TelaFamilia({super.key});
@@ -11,7 +12,7 @@ class TelaFamilia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Família Guanelliana')),
+        appBar: AppBar(title: Text(tr('Família Guanelliana'))),
         body: Carregador<List>(
           carregar: () async => List.from(await Api.get('/app/familia')),
           construir: (context, secoes, _) => ListView(padding: const EdgeInsets.all(16), children: [
@@ -20,8 +21,8 @@ class TelaFamilia extends StatelessWidget {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   leading: CircleAvatar(backgroundColor: dourado.withValues(alpha: 0.2), child: Icon(_icones[s['chave']] ?? Icons.star, color: azul)),
-                  title: Text(s['nome'], style: const TextStyle(fontWeight: FontWeight.w700)),
-                  subtitle: Text((s['itens'] as List).isEmpty ? 'Em breve' : '${(s['itens'] as List).length} conteúdo(s)'),
+                  title: Text(tr(s['nome']), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text((s['itens'] as List).isEmpty ? tr('Em breve') : tr('{n} conteúdo(s)', {'n': (s['itens'] as List).length})),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: (s['itens'] as List).isEmpty ? null : () => Navigator.push(context, MaterialPageRoute(builder: (_) => _TelaSecao(s))),
                 ),
@@ -90,7 +91,7 @@ class _VideoEstado extends State<_Video> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: OutlinedButton.icon(
         icon: const Icon(Icons.play_circle_outline),
-        label: const Text('Assistir ao vídeo'),
+        label: Text(tr('Assistir ao vídeo')),
         onPressed: () => launchUrl(Uri.parse(widget.url), mode: LaunchMode.externalApplication),
       ),
     );

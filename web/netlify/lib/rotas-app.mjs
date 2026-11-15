@@ -24,7 +24,7 @@ export default function (r) {
          AND NOT EXISTS (SELECT 1 FROM respostas rr WHERE rr.atividade_id = a.id AND rr.usuario_id = $1)`,
       [u.id],
     );
-    return json({ nome_app: c.nome_app, nome: u.nome, mensagem_espiritual: c.mensagem_espiritual, novas_atividades: novas.n });
+    return json({ nome_app: c.nome_app, nome: u.nome, mensagem_espiritual: c.mensagem_espiritual, mensagem_espiritual_es: c.mensagem_espiritual_es, novas_atividades: novas.n });
   });
 
   r('GET', '/app/categorias', async () => json(CATEGORIAS));
@@ -111,7 +111,9 @@ export default function (r) {
        ON CONFLICT (usuario_id, atividade_id) DO UPDATE SET status = 'concluida', concluida_em = COALESCE(progresso.concluida_em, now())`,
       [u.id, a.id],
     );
-    await notificar({ titulo: 'Sua atividade foi recebida', corpo: `Obrigado por partilhar sua oração "${a.titulo}". Seguimos caminhando juntos!`, usuarios: [u.id], dados: { tipo: 'recebida' } });
+    await notificar({
+      titulo: 'Sua atividade foi recebida', corpo: `Obrigado por partilhar sua oração "${a.titulo}". Seguimos caminhando juntos!`,
+      tituloEs: 'Tu actividad fue recibida', corpoEs: `Gracias por compartir tu oración "${a.titulo}". ¡Seguimos caminando juntos!`, usuarios: [u.id], dados: { tipo: 'recebida' } });
     return json({ ok: true, id: resp.id, enviada_em: resp.enviada_em }, 201);
   });
 
@@ -187,9 +189,10 @@ export default function (r) {
     const u = await autenticar(req);
     const token = texto(body.token, 500);
     if (!token) falha(400, 'token ausente');
+    const idioma = body.idioma === 'pt' ? 'pt' : 'es';
     await q(
-      'INSERT INTO dispositivos (token, usuario_id) VALUES ($1,$2) ON CONFLICT (token) DO UPDATE SET usuario_id = EXCLUDED.usuario_id, atualizado_em = now()',
-      [token, u.id],
+      'INSERT INTO dispositivos (token, usuario_id, idioma) VALUES ($1,$2,$3) ON CONFLICT (token) DO UPDATE SET usuario_id = EXCLUDED.usuario_id, idioma = EXCLUDED.idioma, atualizado_em = now()',
+      [token, u.id, idioma],
     );
     return json({ ok: true });
   });

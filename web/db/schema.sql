@@ -214,4 +214,5 @@ ALTER TABLE respostas ADD COLUMN IF NOT EXISTS comentario TEXT;
 
 ALTER TABLE recuperacao_senha ADD COLUMN IF NOT EXISTS tentativas INT NOT NULL DEFAULT 0;
 ALTER TABLE mensagens ADD COLUMN IF NOT EXISTS client_uuid TEXT;
+ALTER TABLE dispositivos ADD COLUMN IF NOT EXISTS idioma TEXT NOT NULL DEFAULT 'es';
 CREATE UNIQUE INDEX IF NOT EXISTS mensagens_client_uuid ON mensagens (usuario_id, client_uuid);

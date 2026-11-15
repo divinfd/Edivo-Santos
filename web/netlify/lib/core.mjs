@@ -166,6 +166,7 @@ export const SECOES = {
 export const CONFIG_PADRAO = {
   nome_app: 'Vocacional Hermanas Guanelianas',
   mensagem_espiritual: '',
+  mensagem_espiritual_es: '',
   contato: { nome: '', apresentacao: '', telefone: '', whatsapp: '', email: '', encontros: '' },
   liturgia_fonte: 'https://liturgia.up.railway.app/v2/',
   liturgia_fonte_nome: 'Liturgia Diária (API pública liturgia.up.railway.app)',

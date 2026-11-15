@@ -4,11 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'api.dart';
+import 'idioma.dart';
 import 'comum.dart';
 
 final _local = FlutterLocalNotificationsPlugin();
-const _canal = AndroidNotificationChannel('avisos', 'Avisos e orações',
-    description: 'Novas orações, lembretes e respostas da equipe vocacional', importance: Importance.high);
+final _canal = AndroidNotificationChannel('avisos', tr('Avisos e orações'),
+    description: tr('Novas orações, lembretes e respostas da equipe vocacional'), importance: Importance.high);
 
 /// Tipo da última notificação tocada ('atividade', 'mensagem', 'recebida', 'aviso').
 final aberturaPush = ValueNotifier<String?>(null);
@@ -71,6 +72,6 @@ Future<void> _registrar(String t) async {
   tokenDispositivo = t;
   if (Api.token == null) return;
   try {
-    await Api.post('/app/dispositivo', {'token': t, 'plataforma': 'android'});
+    await Api.post('/app/dispositivo', {'token': t, 'plataforma': 'android', 'idioma': idioma.value});
   } catch (_) {}
 }
