@@ -417,8 +417,10 @@ export default function (r) {
       }
     }
     if (Array.isArray(body.membros)) {
-      await q('DELETE FROM grupo_membros WHERE grupo_id = $1', [params.id]);
-      for (const m of ids(body.membros)) await q("INSERT INTO grupo_membros (grupo_id, usuario_id) SELECT $1, id FROM usuarios WHERE id = $2 AND papel = 'jovem' ON CONFLICT DO NOTHING", [params.id, m]);
+      const v = await jovensVisiveis(u);
+      if (v) await q('DELETE FROM grupo_membros WHERE grupo_id = $1 AND usuario_id = ANY($2::int[])', [params.id, v]);
+      else await q('DELETE FROM grupo_membros WHERE grupo_id = $1', [params.id]);
+      for (const m of ids(body.membros).filter((m) => !v || v.includes(m))) await q("INSERT INTO grupo_membros (grupo_id, usuario_id) SELECT $1, id FROM usuarios WHERE id = $2 AND papel = 'jovem' ON CONFLICT DO NOTHING", [params.id, m]);
     }
     await auditar(u, 'grupo_editado', { grupo: Number(params.id) }, ip);
     return json({ ok: true });
