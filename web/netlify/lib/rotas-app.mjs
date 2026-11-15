@@ -99,14 +99,13 @@ export default function (r) {
         if (!Number.isInteger(n) || n < min || n > max) falha(400, `Valor inválido em "${p.texto}"`);
       }
     }
+    const respondidas = perguntas.filter((p) => itens.get(p.id));
     const resp = await q1(
-      'INSERT INTO respostas (usuario_id, atividade_id, client_uuid, comentario) VALUES ($1,$2,$3,$4) RETURNING id, enviada_em',
-      [u.id, a.id, uuid, texto(body.comentario, 8000) || null],
+      `WITH r AS (INSERT INTO respostas (usuario_id, atividade_id, client_uuid, comentario) VALUES ($1,$2,$3,$4) RETURNING id, enviada_em),
+            i AS (INSERT INTO resposta_itens (resposta_id, pergunta_id, valor) SELECT r.id, x.p, x.v FROM r, unnest($5::int[], $6::text[]) AS x(p, v))
+       SELECT id, enviada_em FROM r`,
+      [u.id, a.id, uuid, texto(body.comentario, 8000) || null, respondidas.map((p) => p.id), respondidas.map((p) => itens.get(p.id))],
     );
-    for (const p of perguntas) {
-      const v = itens.get(p.id);
-      if (v) await q('INSERT INTO resposta_itens (resposta_id, pergunta_id, valor) VALUES ($1,$2,$3)', [resp.id, p.id, v]);
-    }
     await q(
       `INSERT INTO progresso (usuario_id, atividade_id, status, iniciada_em, concluida_em) VALUES ($1,$2,'concluida', now(), now())
        ON CONFLICT (usuario_id, atividade_id) DO UPDATE SET status = 'concluida', concluida_em = COALESCE(progresso.concluida_em, now())`,
