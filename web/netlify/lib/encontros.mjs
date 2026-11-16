@@ -68,7 +68,7 @@ async function exigeEncontroPainel(u, id) {
   if (!e) falha(404, 'Encontro não encontrado.');
   if (u.papel === 'admin' || e.criado_por === u.id) return e;
   const meus = await gruposVisiveis(u);
-  if (!e.para_todos && e.grupos.some((g) => meus.includes(g))) return e;
+  if (e.para_todos || e.grupos.some((g) => meus.includes(g))) return e;
   falha(404, 'Encontro não encontrado.');
 }
 
@@ -86,7 +86,8 @@ async function dadosEncontro(u, body) {
     paraTodos = false;
     grupos = grupos.filter((g) => meus.includes(g));
     if (!grupos.length) falha(400, 'Escolha pelo menos um dos seus grupos.');
-  } else if (!paraTodos && !grupos.length) falha(400, 'Escolha "Todos os jovens" ou pelo menos um grupo.');
+  } else if (paraTodos) grupos = [];
+  else if (!grupos.length) falha(400, 'Escolha "Todos os jovens" ou pelo menos um grupo.');
   return { titulo, descricao: texto(body.descricao, 1000), inicio, duracao_min: duracao, para_todos: paraTodos, grupos };
 }
 
@@ -157,7 +158,7 @@ export default function (r) {
     const lista = await q(
       `SELECT e.*, u.nome AS criado_por_nome FROM encontros e LEFT JOIN usuarios u ON u.id = e.criado_por
         WHERE e.inicio > now() - interval '30 days'
-          AND ($1::int[] IS NULL OR e.criado_por = $2 OR e.grupos && $1::int[])
+          AND ($1::int[] IS NULL OR e.criado_por = $2 OR e.para_todos OR e.grupos && $1::int[])
         ORDER BY e.inicio DESC`,
       [meus, u.id],
     );
