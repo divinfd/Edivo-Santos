@@ -4,10 +4,11 @@ import 'package:intl/intl.dart';
 import 'api.dart';
 import 'idioma.dart';
 
-const azul = Color(0xFF1F4E8C);
-const azulEscuro = Color(0xFF163A69);
-const dourado = Color(0xFFC9A227);
-const fundo = Color(0xFFF6F4EE);
+const azul = Color(0xFF435499);
+const azulEscuro = Color(0xFF2E3D73);
+const dourado = Color(0xFFF2C643);
+const douradoTexto = Color(0xFF9A7400);
+const fundo = Color(0xFFF5F8FC);
 
 final navKey = GlobalKey<NavigatorState>();
 
@@ -21,7 +22,7 @@ ThemeData tema() {
       color: Colors.white,
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: Color(0xFFE4E0D5))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: const BorderSide(color: Color(0xFFD6E0EE))),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,

@@ -34,7 +34,7 @@ class _TelaLiturgiaEstado extends State<TelaLiturgia> {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              if (itens.length > 1) Text(tr('Opção {n}', {'n': i + 1}), style: const TextStyle(color: dourado, fontWeight: FontWeight.w700)),
+              if (itens.length > 1) Text(tr('Opção {n}', {'n': i + 1}), style: const TextStyle(color: douradoTexto, fontWeight: FontWeight.w700)),
               if ((itens[i]['referencia'] ?? '').isNotEmpty) Text(itens[i]['referencia'], style: const TextStyle(fontWeight: FontWeight.w700, color: azul)),
               if ((itens[i]['titulo'] ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: Text(itens[i]['titulo'], style: const TextStyle(fontStyle: FontStyle.italic))),
               if ((itens[i]['refrao'] ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text('R. ${itens[i]['refrao']}', style: const TextStyle(fontWeight: FontWeight.w600))),

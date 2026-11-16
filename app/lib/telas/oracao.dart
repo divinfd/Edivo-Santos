@@ -102,7 +102,7 @@ class _CartaoAtividade extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: dourado, fontSize: 12, fontWeight: FontWeight.w700)),
+                Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: douradoTexto, fontSize: 12, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text(a['titulo'] ?? '', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 6),
@@ -209,7 +209,7 @@ class _TelaAtividadeEstado extends State<TelaAtividade> {
             if (a['capa_key'] != null)
               ClipRRect(borderRadius: BorderRadius.circular(14), child: Image.network(imagemUrl(a['capa_key']), height: 180, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox.shrink())),
             const SizedBox(height: 10),
-            Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: dourado, fontWeight: FontWeight.w700)),
+            Text(tr(a['categoria'] ?? ''), style: const TextStyle(color: douradoTexto, fontWeight: FontWeight.w700)),
             Text(a['titulo'] ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: azulEscuro)),
             const SizedBox(height: 4),
             Text([

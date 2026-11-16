@@ -76,7 +76,7 @@ class _TelaContatoEstado extends State<TelaContato> {
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${tr(tiposMensagem[m['tipo']] ?? 'Mensagem')} · ${fmtDataHora(m['criado_em'])}', style: const TextStyle(color: dourado, fontWeight: FontWeight.w700, fontSize: 12)),
+                    Text('${tr(tiposMensagem[m['tipo']] ?? 'Mensagem')} · ${fmtDataHora(m['criado_em'])}', style: const TextStyle(color: douradoTexto, fontWeight: FontWeight.w700, fontSize: 12)),
                     const SizedBox(height: 4),
                     Text(m['texto'] ?? ''),
                     const SizedBox(height: 8),
