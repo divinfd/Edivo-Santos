@@ -231,3 +231,18 @@ CREATE TABLE IF NOT EXISTS liturgia_es (
   conteudo JSONB NOT NULL,
   atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS encontros (
+  id SERIAL PRIMARY KEY,
+  titulo TEXT NOT NULL,
+  descricao TEXT NOT NULL DEFAULT '',
+  inicio TIMESTAMPTZ NOT NULL,
+  duracao_min INT NOT NULL DEFAULT 60,
+  para_todos BOOLEAN NOT NULL DEFAULT false,
+  grupos INT[] NOT NULL DEFAULT '{}',
+  sala TEXT,
+  sala_url TEXT,
+  lembrete_enviado BOOLEAN NOT NULL DEFAULT false,
+  criado_por INT REFERENCES usuarios(id) ON DELETE SET NULL,
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+);

@@ -1,5 +1,6 @@
 import { q } from '../lib/core.mjs';
 import { enviarAvisoAtividade } from '../lib/rotas-painel.mjs';
+import { lembretesEncontros } from '../lib/encontros.mjs';
 
 export default async () => {
   const pendentes = await q("SELECT * FROM atividades WHERE status = 'publicada' AND notificar AND notificado_em IS NULL AND publicar_em <= now()");
@@ -9,6 +10,11 @@ export default async () => {
     } catch (e) {
       console.error('agendador', a.id, e);
     }
+  }
+  try {
+    await lembretesEncontros();
+  } catch (e) {
+    console.error('agendador encontros', e);
   }
   await q('DELETE FROM sessoes WHERE expira_em < now()');
   return new Response(`ok ${pendentes.length}`);

@@ -10,6 +10,7 @@ import Respostas from './paginas/Respostas.jsx';
 import Familia from './paginas/Familia.jsx';
 import Frases from './paginas/Frases.jsx';
 import Notificacoes from './paginas/Notificacoes.jsx';
+import Encontros from './paginas/Encontros.jsx';
 import Mensagens from './paginas/Mensagens.jsx';
 import Configuracoes from './paginas/Configuracoes.jsx';
 import MinhaConta from './paginas/MinhaConta.jsx';
@@ -95,6 +96,7 @@ export default function App() {
           <NavLink to="/painel/atividades">Orações e materiais</NavLink>
           <NavLink to="/painel/respostas">Feedback <B n={contadores.respostas_nao_lidas} /></NavLink>
           <NavLink to="/painel/mensagens">Mensagens <B n={contadores.mensagens_abertas} /></NavLink>
+          <NavLink to="/painel/encontros">Encontros por vídeo</NavLink>
           <NavLink to="/painel/notificacoes">Notificações</NavLink>
           {admin && <NavLink to="/painel/familia">Família Guanelliana</NavLink>}
           {admin && <NavLink to="/painel/frases">Frases do dia</NavLink>}
@@ -113,6 +115,7 @@ export default function App() {
             <Route path="/painel/atividades/:id" element={<AtividadeEditor />} />
             <Route path="/painel/respostas" element={<Respostas />} />
             <Route path="/painel/mensagens" element={<Mensagens />} />
+            <Route path="/painel/encontros" element={<Encontros />} />
             <Route path="/painel/notificacoes" element={<Notificacoes />} />
             <Route path="/painel/familia" element={<Familia />} />
             <Route path="/painel/frases" element={<Frases />} />

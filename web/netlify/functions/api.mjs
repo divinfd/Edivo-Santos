@@ -2,6 +2,7 @@ import { json, HttpError, corsHeaders } from '../lib/core.mjs';
 import rotasAuth from '../lib/rotas-auth.mjs';
 import rotasApp from '../lib/rotas-app.mjs';
 import rotasPainel from '../lib/rotas-painel.mjs';
+import rotasEncontros from '../lib/encontros.mjs';
 import { getStore } from '@netlify/blobs';
 
 const rotas = [];
@@ -13,6 +14,7 @@ function r(metodo, caminho, fn) {
 rotasAuth(r);
 rotasApp(r);
 rotasPainel(r);
+rotasEncontros(r);
 
 r('GET', '/imagens/:key', async ({ params }) => {
   const res = await getStore({ name: 'imagens' }).getWithMetadata(params.key, { type: 'arrayBuffer' });

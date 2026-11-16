@@ -6,6 +6,7 @@ import '../idioma.dart';
 import '../push.dart';
 import 'conta.dart';
 import 'contato.dart';
+import 'encontros.dart';
 import 'familia.dart';
 import 'feedback.dart';
 import 'liturgia.dart';
@@ -57,6 +58,8 @@ class _TelaPrincipalEstado extends State<TelaPrincipal> {
         setState(() => _aba = 3);
       case 'mensagem':
         setState(() => _aba = 4);
+      case 'encontro':
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaEncontros()));
       default:
         Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaAvisos()));
     }
@@ -131,6 +134,7 @@ class _Inicio extends StatelessWidget {
         final modulos = [
           (Icons.menu_book, tr('Liturgia diária'), tr('Leituras e Evangelho do dia'), () => irPara(1)),
           (Icons.self_improvement, tr('Minha Oração'), tr('Orações e materiais para você'), () => irPara(2)),
+          (Icons.videocam, tr('Encontros por vídeo'), tr('Chamadas de vídeo com o seu grupo'), () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaEncontros()))),
           (Icons.diversity_3, tr('Família Guanelliana'), tr('São Luís Guanella e o carisma'), () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaFamilia()))),
           (Icons.edit_note, tr('Meu Feedback'), tr('O que você partilhou'), () => irPara(3)),
           (Icons.forum, tr('Contato'), tr('Fale com a equipe vocacional'), () => irPara(4)),
@@ -156,6 +160,16 @@ class _Inicio extends StatelessWidget {
               ],
             ]),
           ),
+          if (d['encontro_aberto'] is Map)
+            Card(
+              color: dourado,
+              child: ListTile(
+                leading: const Icon(Icons.videocam, color: azulEscuro),
+                title: Text(tr('Encontro acontecendo agora'), style: const TextStyle(fontWeight: FontWeight.w700, color: azulEscuro)),
+                subtitle: Text((d['encontro_aberto']['titulo'] ?? '').toString(), style: const TextStyle(color: azulEscuro)),
+                trailing: FilledButton(onPressed: () => entrarNoEncontro(context, d['encontro_aberto']['id'] as int), child: Text(tr('Entrar'))),
+              ),
+            ),
           if (novas > 0)
             Card(
               color: const Color(0xFFFFF7E0),

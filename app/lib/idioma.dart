@@ -45,6 +45,29 @@ String? _padrao(String pt) {
 }
 
 const _es = <String, String>{
+  // encontros por vídeo
+  'Encontros por vídeo': 'Encuentros por video',
+  'Encontro por vídeo': 'Encuentro por video',
+  'Chamadas de vídeo com o seu grupo': 'Videollamadas con tu grupo',
+  'Nenhum encontro agendado no momento.': 'No hay encuentros programados por ahora.',
+  'Quando a equipe marcar um encontro, você recebe um aviso.': 'Cuando el equipo programe un encuentro, recibirás un aviso.',
+  '{n} min': '{n} min',
+  'Entrar na sala': 'Entrar a la sala',
+  'A sala abre às {h}.': 'La sala abre a las {h}.',
+  'Câmera e microfone': 'Cámara y micrófono',
+  'Para participar da chamada, permita o uso da câmera e do microfone. Você pode desligá-los durante o encontro.': 'Para participar en la llamada, permite el uso de la cámara y el micrófono. Puedes apagarlos durante el encuentro.',
+  'Entrar mesmo assim': 'Entrar de todos modos',
+  'Abrir configurações': 'Abrir ajustes',
+  'Sair do encontro?': '¿Salir del encuentro?',
+  'Sair': 'Salir',
+  'Continuar': 'Continuar',
+  'Encontro acontecendo agora': 'Encuentro en curso ahora',
+  'A sala abre 30 minutos antes do encontro.': 'La sala abre 30 minutos antes del encuentro.',
+  'Este encontro já terminou.': 'Este encuentro ya terminó.',
+  'Encontro não encontrado.': 'Encuentro no encontrado.',
+  'O serviço de vídeo não respondeu. Tente novamente em instantes.': 'El servicio de video no respondió. Inténtalo de nuevo en unos instantes.',
+  'As chamadas de vídeo ainda não foram configuradas no servidor.': 'Las videollamadas aún no fueron configuradas en el servidor.',
+  'A sala deste encontro não foi criada.': 'La sala de este encuentro no fue creada.',
   // gerais
   'Sem conexão com a internet.': 'Sin conexión a internet.',
   'Não foi possível concluir (erro {n}).': 'No se pudo completar (error {n}).',

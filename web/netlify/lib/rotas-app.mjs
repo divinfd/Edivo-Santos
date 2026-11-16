@@ -4,6 +4,7 @@ import { mensagensComFrase } from './frases.mjs';
 import { SQL_ATIVIDADE_VISIVEL_JOVEM, exigeAtividadeVisivelJovem } from './escopo.mjs';
 import { obterLiturgiaIdioma, dataValida, hojeBrasil } from './liturgia.mjs';
 import { notificar } from './fcm.mjs';
+import { encontroAberto } from './encontros.mjs';
 
 const CAMPOS_ATIVIDADE = `a.id, a.titulo, a.descricao, a.categoria, a.capa_key, a.prazo, a.publicar_em, a.permitir_download, a.permitir_offline, a.status,
   f.id AS arquivo_id, f.nome AS arquivo_nome, f.tamanho AS arquivo_tamanho, f.partes AS arquivo_partes,
@@ -25,7 +26,7 @@ export default function (r) {
          AND NOT EXISTS (SELECT 1 FROM respostas rr WHERE rr.atividade_id = a.id AND rr.usuario_id = $1)`,
       [u.id],
     );
-    return json({ nome_app: NOME_APP, nome: u.nome, ...(await mensagensComFrase(c)), novas_atividades: novas.n });
+    return json({ nome_app: NOME_APP, nome: u.nome, ...(await mensagensComFrase(c)), novas_atividades: novas.n, encontro_aberto: await encontroAberto(u.id).catch(() => null) });
   });
 
   r('GET', '/app/categorias', async () => json(CATEGORIAS));
