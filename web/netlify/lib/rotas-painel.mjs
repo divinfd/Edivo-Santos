@@ -382,6 +382,20 @@ export default function (r) {
     return json({ ok: true });
   });
 
+  r('DELETE', '/painel/equipe/:id', async ({ req, params, ip }) => {
+    const u = await admin(req);
+    const alvo = await q1("SELECT id, nome, papel FROM usuarios WHERE id = $1 AND papel IN ('admin','responsavel')", [params.id]);
+    if (!alvo) falha(404, 'Usuário não encontrado.');
+    if (alvo.id === u.id) falha(400, 'Você não pode excluir a sua própria conta.');
+    if (alvo.papel === 'admin') {
+      const n = await q1("SELECT count(*)::int AS n FROM usuarios WHERE papel = 'admin' AND status = 'ativo' AND id <> $1", [alvo.id]);
+      if (n.n < 1) falha(400, 'É preciso manter pelo menos um administrador ativo.');
+    }
+    await q('DELETE FROM usuarios WHERE id = $1', [alvo.id]);
+    await auditar(u, 'equipe_excluida', { usuario: alvo.id, nome: alvo.nome }, ip);
+    return json({ ok: true });
+  });
+
   r('POST', '/painel/equipe/:id/senha', async ({ req, params, ip }) => {
     const u = await admin(req);
     const alvo = await q1("SELECT id FROM usuarios WHERE id = $1 AND papel IN ('admin','responsavel')", [params.id]);
@@ -665,6 +679,27 @@ export default function (r) {
     return json(await q('SELECT a.id, a.acao, a.detalhe, a.ip, a.criado_em, u.nome AS usuario FROM auditoria a LEFT JOIN usuarios u ON u.id = a.usuario_id ORDER BY a.id DESC LIMIT 500'));
   });
 
+  r('DELETE', '/painel/auditoria/:id', async ({ req, params, ip }) => {
+    const u = await admin(req);
+    const r = await q('DELETE FROM auditoria WHERE id = $1 RETURNING id', [Number(params.id) || 0]);
+    if (!r.length) falha(404, 'Registro não encontrado.');
+    await auditar(u, 'registros_excluidos', { quantidade: 1 }, ip);
+    return json({ ok: true, excluidos: 1 });
+  });
+
+  r('POST', '/painel/auditoria/excluir-periodo', async ({ req, body, ip }) => {
+    const u = await admin(req);
+    const dia = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : null);
+    const de = dia(body.de), ate = dia(body.ate);
+    if (!de || !ate || de > ate) falha(400, 'Informe a data inicial e a data final do período.');
+    const r = await q(
+      "DELETE FROM auditoria WHERE criado_em >= ($1::date::timestamp AT TIME ZONE 'America/Sao_Paulo') AND criado_em < (($2::date + 1)::timestamp AT TIME ZONE 'America/Sao_Paulo') RETURNING id",
+      [de, ate],
+    );
+    await auditar(u, 'registros_excluidos', { de, ate, quantidade: r.length }, ip);
+    return json({ ok: true, excluidos: r.length });
+  });
+
   // ---------- FAMÍLIA GUANELLIANA ----------
   r('GET', '/painel/conteudos', async ({ req }) => {
     await equipe(req);
@@ -780,12 +815,6 @@ export default function (r) {
       c.whatsapp = c.whatsapp.replace(/\D/g, '');
       await setConfig('contato', c);
     }
-    if (body.liturgia_fonte !== undefined) {
-      const f = texto(body.liturgia_fonte, 300);
-      if (!/^https:\/\//.test(f)) falha(400, 'A fonte da liturgia deve ser um endereço https://');
-      await setConfig('liturgia_fonte', f);
-      await setConfig('liturgia_fonte_nome', texto(body.liturgia_fonte_nome, 200) || new URL(f).host);
-    }
     await auditar(u, 'configuracao_alterada', Object.keys(body), ip);
     return json(await configCompleta());
   });
@@ -832,6 +861,16 @@ export default function (r) {
         [v],
       ),
     );
+  });
+
+  r('DELETE', '/painel/mensagens/:id', async ({ req, params, ip }) => {
+    const u = await equipe(req);
+    const m = await q1('SELECT id, usuario_id FROM mensagens WHERE id = $1', [Number(params.id) || 0]);
+    if (!m) falha(404, 'Mensagem não encontrada.');
+    await exigeJovemVisivel(u, m.usuario_id);
+    await q('DELETE FROM mensagens WHERE id = $1', [m.id]);
+    await auditar(u, 'mensagem_excluida', { mensagem: m.id, jovem: m.usuario_id }, ip);
+    return json({ ok: true });
   });
 
   r('POST', '/painel/mensagens/:id/responder', async ({ req, params, body, ip }) => {

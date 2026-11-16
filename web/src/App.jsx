@@ -8,7 +8,6 @@ import Equipe from './paginas/Equipe.jsx';
 import Atividades, { AtividadeEditor } from './paginas/Atividades.jsx';
 import Respostas from './paginas/Respostas.jsx';
 import Familia from './paginas/Familia.jsx';
-import Liturgia from './paginas/Liturgia.jsx';
 import Notificacoes from './paginas/Notificacoes.jsx';
 import Mensagens from './paginas/Mensagens.jsx';
 import Configuracoes from './paginas/Configuracoes.jsx';
@@ -87,7 +86,7 @@ export default function App() {
   const B = ({ n }) => (n ? <span className="badge">{n}</span> : null);
 
   return (
-    <Sessao.Provider value={{ usuario, admin, atualizarContadores: () => api('/painel/dashboard?dias=7').then((d) => setContadores(d.indicadores)) }}>
+    <Sessao.Provider value={{ usuario, admin, setUsuario, atualizarContadores: () => api('/painel/dashboard?dias=7').then((d) => setContadores(d.indicadores)) }}>
       <div className="layout">
         <nav className="menu">
           <div className="marca"><b>Vocacional</b><small>Hermanas Guanelianas</small></div>
@@ -99,7 +98,6 @@ export default function App() {
           <NavLink to="/painel/mensagens">Mensagens <B n={contadores.mensagens_abertas} /></NavLink>
           <NavLink to="/painel/notificacoes">Notificações</NavLink>
           {admin && <NavLink to="/painel/familia">Família Guanelliana</NavLink>}
-          <NavLink to="/painel/liturgia">Liturgia</NavLink>
           {admin && <NavLink to="/painel/equipe">Equipe</NavLink>}
           {admin && <NavLink to="/painel/configuracoes">Configurações</NavLink>}
           {admin && <NavLink to="/painel/auditoria">Registros de acesso</NavLink>}
@@ -118,7 +116,6 @@ export default function App() {
             <Route path="/painel/mensagens" element={<Mensagens />} />
             <Route path="/painel/notificacoes" element={<Notificacoes />} />
             <Route path="/painel/familia" element={<Familia />} />
-            <Route path="/painel/liturgia" element={<Liturgia />} />
             <Route path="/painel/equipe" element={<Equipe />} />
             <Route path="/painel/configuracoes" element={<Configuracoes />} />
             <Route path="/painel/auditoria" element={<Auditoria />} />

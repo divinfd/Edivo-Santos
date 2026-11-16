@@ -24,6 +24,10 @@ export default function Equipe() {
     if (!confirm(`Gerar uma nova senha para ${p.nome}? A senha atual deixará de funcionar.`)) return;
     try { const r = await api(`/painel/equipe/${p.id}/senha`, { metodo: 'POST', corpo: {} }); setSenha({ nome: p.nome, email: p.email, senha: r.senha_temporaria }); } catch (e) { alert(e.message); }
   }
+  async function excluir(p) {
+    if (!confirm(`Excluir ${p.nome} da equipe? A conta será apagada e não poderá ser recuperada.`)) return;
+    try { await api('/painel/equipe/' + p.id, { metodo: 'DELETE' }); recarregar(); } catch (e) { alert(e.message); }
+  }
   const alternar = (id) => setEd({ ...ed, grupos: ed.grupos.includes(id) ? ed.grupos.filter((x) => x !== id) : [...ed.grupos, id] });
   return (
     <>
@@ -42,6 +46,7 @@ export default function Equipe() {
             <td className="acoes">
               <button className="sec" onClick={() => setEd({ ...p, telefone: p.telefone || '', grupos: p.grupos.map((g) => g.id) })}>Editar</button>
               <button className="sec" onClick={() => novaSenha(p)}>Nova senha</button>
+              <button className="perigo" onClick={() => excluir(p)}>Excluir</button>
             </td>
           </tr>
         ))}

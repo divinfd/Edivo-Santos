@@ -151,14 +151,17 @@ class SeletorIdioma extends StatelessWidget {
   final VoidCallback? aoMudar;
   const SeletorIdioma({super.key, this.aoMudar});
   @override
-  Widget build(BuildContext context) => SegmentedButton<String>(
-        showSelectedIcon: false,
-        style: const ButtonStyle(visualDensity: VisualDensity.compact),
-        segments: const [ButtonSegment(value: 'es', label: Text('Español')), ButtonSegment(value: 'pt', label: Text('Português'))],
-        selected: {idioma.value},
-        onSelectionChanged: (s) async {
-          await definirIdioma(s.first);
-          aoMudar?.call();
-        },
+  Widget build(BuildContext context) => ValueListenableBuilder<String>(
+        valueListenable: idioma,
+        builder: (_, atual, _) => SegmentedButton<String>(
+          showSelectedIcon: false,
+          style: const ButtonStyle(visualDensity: VisualDensity.compact),
+          segments: const [ButtonSegment(value: 'es', label: Text('Español')), ButtonSegment(value: 'pt', label: Text('Português'))],
+          selected: {atual},
+          onSelectionChanged: (s) async {
+            await definirIdioma(s.first);
+            aoMudar?.call();
+          },
+        ),
       );
 }

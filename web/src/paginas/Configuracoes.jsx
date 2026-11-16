@@ -33,11 +33,6 @@ export default function Configuracoes() {
         <label>Apresentação</label><textarea value={c.contato.apresentacao} onChange={setCt('apresentacao')} />
         <label>Informações sobre encontros vocacionais</label><textarea value={c.contato.encontros} onChange={setCt('encontros')} />
       </div>
-      <div className="cartao">
-        <h2 style={{ marginTop: 0 }}>Fonte da liturgia diária</h2>
-        <label>Endereço da fonte (API)</label><input value={c.liturgia_fonte} onChange={(e) => setC({ ...c, liturgia_fonte: e.target.value })} />
-        <label>Nome da fonte (mostrado no app)</label><input value={c.liturgia_fonte_nome} onChange={(e) => setC({ ...c, liturgia_fonte_nome: e.target.value })} />
-      </div>
       {msg && <div className="erro">{msg}</div>}{ok && <div className="ok">{ok}</div>}
       <div className="acoes"><button onClick={salvar}>Salvar configurações</button></div>
     </>

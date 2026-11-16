@@ -142,6 +142,17 @@ export default function (r) {
     return json({ ok: true, mensagem: 'Senha alterada com sucesso.' });
   });
 
+  r('POST', '/auth/email', async ({ req, body, ip }) => {
+    const u = await autenticar(req);
+    const atual = await q1('SELECT senha_hash FROM usuarios WHERE id = $1', [u.id]);
+    if (!confereSenha(body.senha || '', atual.senha_hash)) falha(400, 'A senha atual está incorreta.');
+    const email = emailValido(body.email);
+    if (await q1('SELECT id FROM usuarios WHERE email = $1 AND id <> $2', [email, u.id])) falha(409, 'Já existe outra conta com este e-mail.');
+    await q('UPDATE usuarios SET email = $1 WHERE id = $2', [email, u.id]);
+    await auditar(u, 'email_alterado', { de: u.email, para: email }, ip);
+    return json(perfil({ ...u, email }));
+  });
+
   r('POST', '/auth/excluir-conta', async ({ req, body, ip }) => {
     const u = await autenticar(req);
     const atual = await q1('SELECT senha_hash FROM usuarios WHERE id = $1', [u.id]);
