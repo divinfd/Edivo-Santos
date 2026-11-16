@@ -387,11 +387,12 @@ export default function (r) {
     const alvo = await q1("SELECT id, nome, papel FROM usuarios WHERE id = $1 AND papel IN ('admin','responsavel')", [params.id]);
     if (!alvo) falha(404, 'Usuário não encontrado.');
     if (alvo.id === u.id) falha(400, 'Você não pode excluir a sua própria conta.');
-    if (alvo.papel === 'admin') {
-      const n = await q1("SELECT count(*)::int AS n FROM usuarios WHERE papel = 'admin' AND status = 'ativo' AND id <> $1", [alvo.id]);
-      if (n.n < 1) falha(400, 'É preciso manter pelo menos um administrador ativo.');
-    }
-    await q('DELETE FROM usuarios WHERE id = $1', [alvo.id]);
+    const apagado = await q1(
+      `WITH admins AS (SELECT id FROM usuarios WHERE papel = 'admin' AND status = 'ativo' FOR UPDATE)
+       DELETE FROM usuarios WHERE id = $1 AND (papel <> 'admin' OR (SELECT count(*) FROM admins WHERE id <> $1) >= 1) RETURNING id`,
+      [alvo.id],
+    );
+    if (!apagado) falha(400, 'É preciso manter pelo menos um administrador ativo.');
     await auditar(u, 'equipe_excluida', { usuario: alvo.id, nome: alvo.nome }, ip);
     return json({ ok: true });
   });
