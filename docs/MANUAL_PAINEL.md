@@ -17,14 +17,14 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 | **Grupos** | Criar grupos, escolher responsáveis e jovens. |
 | **Orações e materiais** | Nova oração/atividade: título, descrição, categoria, PDF, capa, vídeo, para quem (todos ou grupos), permitir cópia offline/baixar, perguntas (texto longo, resposta curta, múltipla escolha, escala; obrigatória ou não). Salvar como rascunho, **Publicar** (com ou sem notificação) e **Arquivar**. |
 | **Respostas** | Ler as partilhas de cada jovem, escrever observações privadas (o jovem não vê), exportar em PDF ou Excel. |
-| **Mensagens** | Dúvidas, pedidos de orientação e de encontros enviados pelos jovens; responder (o jovem recebe notificação). |
-| **Notificações** | Enviar comunicados/lembretes para todos, para grupos ou para jovens escolhidos; histórico. |
+| **Mensagens** | Dúvidas, pedidos de orientação e de encontros enviados pelos jovens; responder (o jovem recebe notificação) ou **Excluir**. |
+| **Encontros por vídeo** | Criar um encontro coletivo (título, dia e hora, duração, para todos ou grupos, notificar agora). O servidor cria uma sala privada no Daily.co; só os jovens dos grupos escolhidos entram, pelo app. A sala abre 30 minutos antes e fecha 30 minutos depois do fim; um lembrete é enviado perto do início. A equipe entra por aqui como moderadora. A tela mostra os minutos usados no mês: ao chegar a 9.000 (dos 10.000 grátis) ninguém mais entra até o mês seguinte, para nunca gerar cobrança. |
+| **Notificações** | Enviar comunicados/lembretes para todos, para grupos ou para jovens escolhidos. |
+| **Frases do dia** | Frases de São Luís Guanella (espanhol e português, com a fonte). O app mostra uma por dia abaixo da mensagem de boas-vindas. |
 | **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano. Os textos iniciais são rascunhos para as irmãs revisarem. |
-| **Liturgia diária** | Ver a liturgia de qualquer dia e corrigir manualmente (a correção prevalece sobre a fonte automática). |
-| **Equipe** *(admin)* | Cadastrar responsáveis e administradores, definir nova senha, desativar. |
-| **Configurações** *(admin)* | Nome do app, mensagem espiritual (em português e em espanhol), dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
-| **Registros de acesso** *(admin)* | Auditoria de entradas e ações administrativas. |
-| **Minha conta** | Trocar a própria senha. |
+| **Equipe** *(admin)* | Cadastrar responsáveis e administradores, definir nova senha, desativar ou **Excluir**. |
+| **Configurações** *(admin)* | Mensagem espiritual (em português e em espanhol), dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
+| **Minha conta** | Trocar o e-mail de acesso e a senha. |
 
 ## Primeiros passos sugeridos
 1. Entrar com o administrador e trocar a senha em **Minha conta**.
