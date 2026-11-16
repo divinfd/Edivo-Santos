@@ -16,6 +16,6 @@ export async function mensagensComFrase(c) {
   const junta = (base, frase, nome) => (frase ? `${base ? base + '\n\n' : ''}“${frase}”\n— ${nome}` : base);
   return {
     mensagem_espiritual: junta(c.mensagem_espiritual, f?.pt, 'São Luís Guanella'),
-    mensagem_espiritual_es: junta(c.mensagem_espiritual_es, f?.es, 'San Luis Guanella'),
+    mensagem_espiritual_es: junta(c.mensagem_espiritual_es || c.mensagem_espiritual, f?.es, 'San Luis Guanella'),
   };
 }
