@@ -82,3 +82,63 @@ export async function obterLiturgia(iso) {
     return null;
   }
 }
+
+const EVANGELIZO = 'https://feed.evangelizo.org/v2/reader.php';
+const FONTE_ES = 'Evangelio del día (evangeliodeldia.org) · Biblia: Libro del Pueblo de Dios';
+
+function htmlParaTexto(h) {
+  return String(h || '')
+    .split(/<br\s*\/?>\s*Extraído de la Biblia/i)[0]
+    .replace(/<br\s*\/?>[ \t]*\r?\n?/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+async function evangelizo(params) {
+  const url = new URL(EVANGELIZO);
+  for (const [k, v] of Object.entries({ lang: 'SP', ...params })) url.searchParams.set(k, v);
+  const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+  if (!r.ok) throw new Error('evangelizo ' + r.status);
+  return htmlParaTexto(await r.text());
+}
+
+export async function buscarFonteEs(iso) {
+  const date = iso.replace(/-/g, '');
+  const leitura = async (content) => {
+    const [texto, referencia] = await Promise.all([evangelizo({ date, type: 'reading', content }), evangelizo({ date, type: 'reading_lt', content })]);
+    return texto ? [{ referencia, titulo: '', refrao: '', texto }] : [];
+  };
+  const [titulo, primeira, salmo, segunda, evangelho] = await Promise.all([
+    evangelizo({ date, type: 'liturgic_t' }), leitura('FR'), leitura('PS'), leitura('SR'), leitura('GSP'),
+  ]);
+  if (!primeira.length || !evangelho.length) throw new Error('evangelizo sem leituras');
+  return { titulo, primeira_leitura: primeira, salmo, segunda_leitura: segunda, evangelho, fonte: FONTE_ES };
+}
+
+let tabelaEs;
+function garantirTabelaEs() {
+  tabelaEs ||= q('CREATE TABLE IF NOT EXISTS liturgia_es (data DATE PRIMARY KEY, conteudo JSONB NOT NULL, atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now())').catch((e) => { tabelaEs = null; throw e; });
+  return tabelaEs;
+}
+
+export async function obterLiturgiaIdioma(iso, idioma) {
+  const pt = await obterLiturgia(iso);
+  if (idioma !== 'es' || (pt && pt.manual)) return pt ? { ...pt, idioma: 'pt' } : null;
+  await garantirTabelaEs();
+  let es = (await q1('SELECT conteudo FROM liturgia_es WHERE data = $1', [iso]))?.conteudo;
+  if (!es) {
+    try {
+      es = await buscarFonteEs(iso);
+      await q('INSERT INTO liturgia_es (data, conteudo) VALUES ($1,$2) ON CONFLICT (data) DO NOTHING', [iso, JSON.stringify(es)]);
+    } catch (e) {
+      console.error('liturgia es', e.message);
+    }
+  }
+  if (!es) return pt ? { ...pt, idioma: 'pt' } : null;
+  return {
+    data: iso, cor: pt?.cor || '', tempo: tempoLiturgico(iso), reflexao: '', santo: '', manual: false,
+    ...es, idioma: 'es',
+  };
+}

@@ -2,7 +2,7 @@ import { getStore } from '@netlify/blobs';
 import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, CATEGORIAS } from './core.mjs';
 import { mensagensComFrase } from './frases.mjs';
 import { SQL_ATIVIDADE_VISIVEL_JOVEM, exigeAtividadeVisivelJovem } from './escopo.mjs';
-import { obterLiturgia, dataValida, hojeBrasil } from './liturgia.mjs';
+import { obterLiturgiaIdioma, dataValida, hojeBrasil } from './liturgia.mjs';
 import { notificar } from './fcm.mjs';
 
 const CAMPOS_ATIVIDADE = `a.id, a.titulo, a.descricao, a.categoria, a.capa_key, a.prazo, a.publicar_em, a.permitir_download, a.permitir_offline, a.status,
@@ -136,9 +136,14 @@ export default function (r) {
   });
 
   r('GET', '/app/liturgia', async ({ req, url }) => {
-    await autenticar(req);
+    const u = await autenticar(req);
     const iso = dataValida(url.searchParams.get('data')) || hojeBrasil();
-    const l = await obterLiturgia(iso);
+    let idioma = url.searchParams.get('idioma');
+    if (idioma !== 'pt' && idioma !== 'es') {
+      const d = await q1('SELECT idioma FROM dispositivos WHERE usuario_id = $1 ORDER BY atualizado_em DESC LIMIT 1', [u.id]);
+      idioma = d?.idioma === 'pt' ? 'pt' : 'es';
+    }
+    const l = await obterLiturgiaIdioma(iso, idioma);
     if (!l) falha(503, 'Não foi possível carregar a liturgia deste dia. Tente novamente mais tarde.');
     return json(l);
   });

@@ -68,8 +68,8 @@ class _TelaLiturgiaEstado extends State<TelaLiturgia> {
       ),
       Expanded(
         child: Carregador<Map>(
-          key: ValueKey(_iso),
-          carregar: () async => Map.from(await Api.get('/app/liturgia?data=$_iso')),
+          key: ValueKey('$_iso-${idioma.value}'),
+          carregar: () async => Map.from(await Api.get('/app/liturgia?data=$_iso&idioma=${idioma.value}')),
           construir: (context, l, _) => ListView(padding: const EdgeInsets.all(16), children: [
             Card(
               child: Padding(
@@ -95,7 +95,7 @@ class _TelaLiturgiaEstado extends State<TelaLiturgia> {
               Card(child: Padding(padding: const EdgeInsets.all(16), child: SelectableText(l['reflexao'], style: const TextStyle(fontSize: 16, height: 1.5)))),
             ],
             const SizedBox(height: 12),
-            if (emEspanhol) Text(tr('Os textos das leituras vêm da fonte em português.'), style: const TextStyle(color: Colors.black45, fontSize: 12)),
+            if (emEspanhol && l['idioma'] != 'es') Text(tr('Os textos das leituras vêm da fonte em português.'), style: const TextStyle(color: Colors.black45, fontSize: 12)),
             Text(tr('Fonte: {f}', {'f': l['manual'] == true ? tr('revisado pela equipe vocacional') : (l['fonte'] ?? '')}), style: const TextStyle(color: Colors.black45, fontSize: 12)),
           ]),
         ),

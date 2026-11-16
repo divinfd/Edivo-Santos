@@ -225,3 +225,9 @@ CREATE TABLE IF NOT EXISTS frases (
   ativa BOOLEAN NOT NULL DEFAULT true,
   criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS liturgia_es (
+  data DATE PRIMARY KEY,
+  conteudo JSONB NOT NULL,
+  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+);
