@@ -49,10 +49,30 @@ export async function minutosUsadosMes() {
   return usoCache.v;
 }
 
-async function exigeCota() {
-  if (await minutosUsadosMes() >= LIMITE_MIN) {
-    falha(429, 'O limite mensal de minutos de vídeo gratuitos foi atingido. As salas voltam a abrir no início do próximo mês.');
+// Cada acesso reserva o tempo até o fim do token; enquanto a pessoa está na sala (ou acabou de receber
+// o acesso), esse tempo conta como já gasto. Assim a soma nunca passa do limite mensal.
+async function fimPermitido(e, u) {
+  const agora = Math.floor(Date.now() / 1000);
+  const [usados, presenca, acessos] = await Promise.all([
+    minutosUsadosMes(),
+    daily('GET', '/presence'),
+    q(`SELECT sala, usuario_id, ate, criado_em > now() - interval '2 minutes' AS recente FROM video_acessos WHERE ate > $1`, [agora]),
+  ]);
+  const presentes = new Set(Object.values(presenca || {}).flat().map((p) => `${p.room}:${p.userId}`));
+  let reservado = 0;
+  for (const a of acessos) {
+    if (a.sala === e.sala && a.usuario_id === u.id) continue;
+    if (a.recente || presentes.has(`${a.sala}:${a.usuario_id}`)) reservado += (Number(a.ate) - agora) / 60;
   }
+  const livre = Math.floor(LIMITE_MIN - usados - reservado);
+  if (livre < 5) falha(429, 'O limite mensal de minutos de vídeo gratuitos foi atingido. As salas voltam a abrir no início do próximo mês.');
+  const ate = Math.min(expiraSala(e), agora + livre * 60);
+  await q(
+    `INSERT INTO video_acessos (sala, usuario_id, ate) VALUES ($1, $2, $3)
+      ON CONFLICT (sala, usuario_id) DO UPDATE SET ate = EXCLUDED.ate, criado_em = now()`,
+    [e.sala, u.id, ate],
+  );
+  return ate;
 }
 
 let tabela;
@@ -70,7 +90,15 @@ function garantirTabela() {
       lembrete_enviado BOOLEAN NOT NULL DEFAULT false,
       criado_por INT REFERENCES usuarios(id) ON DELETE SET NULL,
       criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
-    )`).catch((e) => { tabela = null; throw e; });
+    )`)
+    .then(() => q(`CREATE TABLE IF NOT EXISTS video_acessos (
+      sala TEXT NOT NULL,
+      usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+      ate BIGINT NOT NULL,
+      criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY (sala, usuario_id)
+    )`))
+    .catch((e) => { tabela = null; throw e; });
   return tabela;
 }
 
@@ -143,13 +171,15 @@ async function avisar(e, autor, lembrete = false) {
 }
 
 async function token(e, u, dono, idioma) {
+  const ate = await fimPermitido(e, u);
   const t = await daily('POST', '/meeting-tokens', {
     properties: {
       room_name: e.sala,
       user_name: texto(u.nome, 60) || 'Participante',
       user_id: String(u.id),
       is_owner: dono,
-      exp: expiraSala(e),
+      exp: ate,
+      eject_at_token_exp: true,
       lang: idioma === 'pt' ? 'pt' : 'es',
     },
   });
@@ -243,7 +273,6 @@ export default function (r) {
     const e = await exigeEncontroPainel(u, params.id);
     if (situacao(e) === 'encerrado') falha(410, 'Este encontro já terminou.');
     if (!e.sala_url) falha(409, 'A sala deste encontro não foi criada.');
-    await exigeCota();
     return json({ url: e.sala_url, token: await token(e, u, true, 'pt') });
   });
 
@@ -268,7 +297,6 @@ export default function (r) {
     if (s === 'agendado') falha(409, `A sala abre ${ANTECEDENCIA_MIN} minutos antes do encontro.`);
     if (s === 'encerrado') falha(410, 'Este encontro já terminou.');
     if (!e.sala_url) falha(409, 'A sala deste encontro não foi criada.');
-    await exigeCota();
     const dono = u.papel === 'admin' || u.papel === 'responsavel';
     return json({ url: e.sala_url, token: await token(e, u, dono, body.idioma) });
   });

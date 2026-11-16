@@ -246,3 +246,11 @@ CREATE TABLE IF NOT EXISTS encontros (
   criado_por INT REFERENCES usuarios(id) ON DELETE SET NULL,
   criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS video_acessos (
+  sala TEXT NOT NULL,
+  usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  ate BIGINT NOT NULL,
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (sala, usuario_id)
+);
