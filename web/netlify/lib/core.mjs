@@ -163,8 +163,10 @@ export const SECOES = {
   carisma: 'Carisma Guanelliano',
 };
 
+export const NOME_APP = 'Vocacional Hermanas Guanelianas';
+
 export const CONFIG_PADRAO = {
-  nome_app: 'Vocacional Hermanas Guanelianas',
+  nome_app: NOME_APP,
   mensagem_espiritual: '',
   mensagem_espiritual_es: '',
   contato: { nome: '', apresentacao: '', telefone: '', whatsapp: '', email: '', encontros: '' },

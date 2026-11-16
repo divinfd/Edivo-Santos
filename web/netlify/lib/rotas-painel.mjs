@@ -838,11 +838,6 @@ export default function (r) {
 
   r('PUT', '/painel/config', async ({ req, body, ip }) => {
     const u = await admin(req);
-    if (body.nome_app !== undefined) {
-      const n = texto(body.nome_app, 80);
-      if (!n) falha(400, 'Informe o nome do aplicativo.');
-      await setConfig('nome_app', n);
-    }
     if (body.mensagem_espiritual !== undefined) await setConfig('mensagem_espiritual', texto(body.mensagem_espiritual, 1000));
     if (body.mensagem_espiritual_es !== undefined) await setConfig('mensagem_espiritual_es', texto(body.mensagem_espiritual_es, 1000));
     if (body.contato) {

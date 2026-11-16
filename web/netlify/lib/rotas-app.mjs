@@ -1,5 +1,5 @@
 import { getStore } from '@netlify/blobs';
-import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, CATEGORIAS } from './core.mjs';
+import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, CATEGORIAS, NOME_APP } from './core.mjs';
 import { mensagensComFrase } from './frases.mjs';
 import { SQL_ATIVIDADE_VISIVEL_JOVEM, exigeAtividadeVisivelJovem } from './escopo.mjs';
 import { obterLiturgiaIdioma, dataValida, hojeBrasil } from './liturgia.mjs';
@@ -25,7 +25,7 @@ export default function (r) {
          AND NOT EXISTS (SELECT 1 FROM respostas rr WHERE rr.atividade_id = a.id AND rr.usuario_id = $1)`,
       [u.id],
     );
-    return json({ nome_app: c.nome_app, nome: u.nome, ...(await mensagensComFrase(c)), novas_atividades: novas.n });
+    return json({ nome_app: NOME_APP, nome: u.nome, ...(await mensagensComFrase(c)), novas_atividades: novas.n });
   });
 
   r('GET', '/app/categorias', async () => json(CATEGORIAS));

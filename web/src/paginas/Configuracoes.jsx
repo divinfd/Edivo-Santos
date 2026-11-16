@@ -17,7 +17,6 @@ export default function Configuracoes() {
       <h1>Configurações</h1>
       <div className="cartao">
         <h2 style={{ marginTop: 0 }}>Aplicativo</h2>
-        <label>Nome do aplicativo</label><input value={c.nome_app} onChange={(e) => setC({ ...c, nome_app: e.target.value })} />
         <label>Mensagem espiritual da tela inicial (português)</label><textarea value={c.mensagem_espiritual} onChange={(e) => setC({ ...c, mensagem_espiritual: e.target.value })} />
         <label>Mensagem espiritual em espanhol (idioma principal do app)</label><textarea value={c.mensagem_espiritual_es || ''} onChange={(e) => setC({ ...c, mensagem_espiritual_es: e.target.value })} />
       </div>
