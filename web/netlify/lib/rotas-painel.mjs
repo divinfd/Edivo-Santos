@@ -8,6 +8,7 @@ import { jovensVisiveis, gruposVisiveis, exigeJovemVisivel, exigeAtividadePainel
 import { notificar, fcmConfigurado } from './fcm.mjs';
 import { obterLiturgia, buscarFonte, dataValida, hojeBrasil, tempoLiturgico } from './liturgia.mjs';
 import { emailConfigurado } from './email.mjs';
+import { fraseDoDia } from './frases.mjs';
 
 export const TAMANHO_PARTE = 3 * 1024 * 1024;
 const MAX_PDF = 40 * 1024 * 1024;
@@ -699,6 +700,40 @@ export default function (r) {
     );
     await auditar(u, 'registros_excluidos', { de, ate, quantidade: r.length }, ip);
     return json({ ok: true, excluidos: r.length });
+  });
+
+  // ---------- FRASES DE SÃO LUÍS GUANELLA ----------
+  r('GET', '/painel/frases', async ({ req }) => {
+    await admin(req);
+    return json({ lista: await q('SELECT * FROM frases ORDER BY id'), hoje: await fraseDoDia() });
+  });
+
+  function dadosFrase(body) {
+    const pt = texto(body.texto_pt, 1000), es = texto(body.texto_es, 1000);
+    if (!pt && !es) falha(400, 'Escreva a frase em português ou em espanhol.');
+    return [pt, es, texto(body.fonte, 300), body.ativa !== false];
+  }
+
+  r('POST', '/painel/frases', async ({ req, body, ip }) => {
+    const u = await admin(req);
+    const f = await q1('INSERT INTO frases (texto_pt, texto_es, fonte, ativa) VALUES ($1,$2,$3,$4) RETURNING *', dadosFrase(body));
+    await auditar(u, 'frase_criada', { frase: f.id }, ip);
+    return json(f, 201);
+  });
+
+  r('PUT', '/painel/frases/:id', async ({ req, params, body, ip }) => {
+    const u = await admin(req);
+    const f = await q1('UPDATE frases SET texto_pt=$1, texto_es=$2, fonte=$3, ativa=$4 WHERE id=$5 RETURNING *', [...dadosFrase(body), Number(params.id) || 0]);
+    if (!f) falha(404, 'Frase não encontrada.');
+    await auditar(u, 'frase_editada', { frase: f.id }, ip);
+    return json(f);
+  });
+
+  r('DELETE', '/painel/frases/:id', async ({ req, params, ip }) => {
+    const u = await admin(req);
+    await q('DELETE FROM frases WHERE id = $1', [Number(params.id) || 0]);
+    await auditar(u, 'frase_excluida', { frase: Number(params.id) }, ip);
+    return json({ ok: true });
   });
 
   // ---------- FAMÍLIA GUANELLIANA ----------
