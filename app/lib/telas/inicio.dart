@@ -75,7 +75,10 @@ class _TelaPrincipalEstado extends State<TelaPrincipal> {
     ];
     return Scaffold(
       appBar: AppBar(
-        title: Text(_aba == 0 ? 'Vocacional Hermanas Guanelianas' : tr(_titulos[_aba]), style: TextStyle(fontSize: _aba == 0 ? 17 : 20)),
+        backgroundColor: _aba == 0 ? Colors.white : null,
+        title: _aba == 0
+            ? Image.asset('assets/logo_topo.png', height: 40, semanticLabel: 'Vocacional Hermanas Guanelianas')
+            : Text(tr(_titulos[_aba]), style: const TextStyle(fontSize: 20)),
         actions: [
           IconButton(tooltip: tr('Avisos'), icon: const Icon(Icons.notifications_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaAvisos()))),
           IconButton(tooltip: tr('Minha conta'), icon: const Icon(Icons.account_circle_outlined), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaConta()))),
