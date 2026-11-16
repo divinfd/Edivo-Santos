@@ -145,7 +145,12 @@ export async function lembretesEncontros() {
       RETURNING *`,
   );
   for (const e of lista) {
-    try { await avisar(e, null, true); } catch (err) { console.error('lembrete encontro', e.id, err); }
+    try {
+      await avisar(e, null, true);
+    } catch (err) {
+      console.error('lembrete encontro', e.id, err);
+      await q('UPDATE encontros SET lembrete_enviado = false WHERE id = $1', [e.id]).catch(() => {});
+    }
   }
   return lista.length;
 }
