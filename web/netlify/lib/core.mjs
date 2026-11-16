@@ -181,5 +181,6 @@ export async function configCompleta() {
     if (l.chave === 'contato') c.contato = { ...c.contato, ...l.valor };
     else c[l.chave] = l.valor;
   }
+  c.nome_app = NOME_APP;
   return c;
 }
