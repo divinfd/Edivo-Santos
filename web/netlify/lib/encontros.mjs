@@ -33,18 +33,19 @@ const inicioMes = () => {
 
 let usoCache;
 export async function minutosUsadosMes() {
-  if (usoCache && Date.now() - usoCache.t < 60000) return usoCache.v;
+  const mes = inicioMes();
+  if (usoCache?.mes === mes && Date.now() - usoCache.t < 60000) return usoCache.v;
   const agora = Date.now() / 1000;
   let seg = 0;
   let depois = '';
   for (let pagina = 0; pagina < 50; pagina++) {
-    const d = await daily('GET', `/meetings?timeframe_start=${inicioMes()}&limit=100${depois && `&starting_after=${encodeURIComponent(depois)}`}`);
+    const d = await daily('GET', `/meetings?timeframe_start=${mes}&limit=100${depois && `&starting_after=${encodeURIComponent(depois)}`}`);
     const lista = d.data || [];
     for (const m of lista) for (const p of m.participants || []) seg += Number(p.duration) || Math.max(0, agora - Number(p.join_time || agora));
     if (lista.length < 100) break;
     depois = lista[lista.length - 1].id;
   }
-  usoCache = { t: Date.now(), v: Math.ceil(seg / 60) };
+  usoCache = { mes, t: Date.now(), v: Math.ceil(seg / 60) };
   return usoCache.v;
 }
 
