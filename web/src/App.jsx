@@ -12,7 +12,6 @@ import Frases from './paginas/Frases.jsx';
 import Notificacoes from './paginas/Notificacoes.jsx';
 import Mensagens from './paginas/Mensagens.jsx';
 import Configuracoes from './paginas/Configuracoes.jsx';
-import Auditoria from './paginas/Auditoria.jsx';
 import MinhaConta from './paginas/MinhaConta.jsx';
 
 export const Sessao = createContext(null);
@@ -102,7 +101,6 @@ export default function App() {
           {admin && <NavLink to="/painel/frases">Frases do dia</NavLink>}
           {admin && <NavLink to="/painel/equipe">Equipe</NavLink>}
           {admin && <NavLink to="/painel/configuracoes">Configurações</NavLink>}
-          {admin && <NavLink to="/painel/auditoria">Registros de acesso</NavLink>}
           <NavLink to="/painel/conta">Minha conta</NavLink>
           <div className="sair">{usuario.nome}<br /><span className="mudo" style={{ color: '#c9d6e8' }}>{admin ? 'Administrador' : 'Responsável vocacional'}</span><br /><button onClick={sair}>Sair</button></div>
         </nav>
@@ -121,7 +119,6 @@ export default function App() {
             <Route path="/painel/frases" element={<Frases />} />
             <Route path="/painel/equipe" element={<Equipe />} />
             <Route path="/painel/configuracoes" element={<Configuracoes />} />
-            <Route path="/painel/auditoria" element={<Auditoria />} />
             <Route path="/painel/conta" element={<MinhaConta />} />
             <Route path="*" element={<Navigate to="/painel" />} />
           </Routes>

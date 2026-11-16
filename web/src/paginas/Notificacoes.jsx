@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { api, fmtDataHora } from '../api.js';
+import { api } from '../api.js';
 import { useCarregar, useSessao } from '../App.jsx';
 
 export default function Notificacoes() {
   const { admin } = useSessao();
-  const [lista, erro, recarregar] = useCarregar(() => api('/painel/notificacoes'));
   const [grupos] = useCarregar(() => api('/painel/grupos'));
   const [jovens] = useCarregar(() => api('/painel/jovens?status=ativo'));
   const [status] = useCarregar(() => api('/painel/status'));
@@ -18,7 +17,6 @@ export default function Notificacoes() {
       const r = await api('/painel/notificacoes', { metodo: 'POST', corpo: { titulo: f.titulo, corpo: f.corpo, para_todos: f.destino === 'todos', grupos: f.destino === 'grupos' ? f.grupos : [], usuarios: f.destino === 'jovens' ? f.usuarios : [] } });
       setOk(`Aviso registrado. Entregue como notificação em ${r.entregues} aparelho(s); também aparece na área de avisos do app.`);
       setF({ ...f, titulo: '', corpo: '' });
-      recarregar();
     } catch (e) { setMsg(e.message); }
   }
   return (
@@ -38,15 +36,6 @@ export default function Notificacoes() {
         {msg && <div className="erro">{msg}</div>}{ok && <div className="ok">{ok}</div>}
         <div className="acoes"><button onClick={enviar} disabled={!f.titulo.trim() || !f.corpo.trim()}>Enviar aviso</button></div>
       </div>
-      <h2>Histórico</h2>
-      {erro && <div className="erro">{erro}</div>}
-      <table><thead><tr><th>Data</th><th>Aviso</th><th>Destino</th><th>Entregues</th><th>Por</th></tr></thead><tbody>
-        {(lista || []).map((n) => (
-          <tr key={n.id}><td>{fmtDataHora(n.criada_em)}</td><td><b>{n.titulo}</b><div className="mudo">{n.corpo}</div></td>
-            <td>{n.para_todos ? 'Todos' : [n.grupos?.length && `${n.grupos.length} grupo(s)`, n.usuarios?.length && `${n.usuarios.length} jovem(ns)`].filter(Boolean).join(', ') || '—'}</td>
-            <td>{n.entregues ?? '—'}</td><td>{n.enviada_por_nome || 'Sistema'}</td></tr>
-        ))}
-      </tbody></table>
     </>
   );
 }
