@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -13,11 +14,16 @@ const fundo = Color(0xFFF5F8FC);
 final navKey = GlobalKey<NavigatorState>();
 
 ThemeData tema() {
-  final cs = ColorScheme.fromSeed(seedColor: azul, primary: azul, secondary: dourado, surface: Colors.white);
+  final cs = ColorScheme.fromSeed(seedColor: azul, primary: azul, secondary: dourado, secondaryContainer: dourado, onSecondaryContainer: azulEscuro, surface: Colors.white);
   return ThemeData(
     colorScheme: cs,
     scaffoldBackgroundColor: fundo,
-    appBarTheme: const AppBarTheme(backgroundColor: azul, foregroundColor: Colors.white, centerTitle: false),
+    appBarTheme: const AppBarTheme(backgroundColor: dourado, foregroundColor: azulEscuro, centerTitle: false, systemOverlayStyle: SystemUiOverlayStyle.dark),
+    navigationBarTheme: const NavigationBarThemeData(backgroundColor: Colors.white, indicatorColor: dourado),
+    chipTheme: const ChipThemeData(selectedColor: dourado),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? dourado : Colors.white), foregroundColor: const WidgetStatePropertyAll(azulEscuro)),
+    ),
     cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 0,

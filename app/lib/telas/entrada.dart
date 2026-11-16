@@ -19,6 +19,7 @@ class _Fundo extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: dourado, width: 4)),
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: filhos),

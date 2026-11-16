@@ -140,7 +140,7 @@ class _Inicio extends StatelessWidget {
               gradient: const LinearGradient(colors: [azul, azulEscuro]),
             ),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('$saudacao, $primeiro!', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+              Text('$saudacao, $primeiro!', style: const TextStyle(color: dourado, fontSize: 22, fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
               Text(fmtDataLonga(DateTime.now()), style: const TextStyle(color: Colors.white70)),
               if (mensagem.isNotEmpty) ...[
@@ -168,7 +168,7 @@ class _Inicio extends StatelessWidget {
             Card(
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                leading: CircleAvatar(backgroundColor: azul.withValues(alpha: 0.1), child: Icon(m.$1, color: azul)),
+                leading: CircleAvatar(backgroundColor: dourado, child: Icon(m.$1, color: azulEscuro)),
                 title: Text(m.$2, style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(m.$3),
                 trailing: const Icon(Icons.chevron_right),
