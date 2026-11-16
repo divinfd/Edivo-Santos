@@ -149,6 +149,7 @@ export default function (r) {
     const email = emailValido(body.email);
     if (await q1('SELECT id FROM usuarios WHERE email = $1 AND id <> $2', [email, u.id])) falha(409, 'Já existe outra conta com este e-mail.');
     await q('UPDATE usuarios SET email = $1 WHERE id = $2', [email, u.id]);
+    await q('UPDATE recuperacao_senha SET usado = true WHERE usuario_id = $1', [u.id]);
     await auditar(u, 'email_alterado', { de: u.email, para: email }, ip);
     return json(perfil({ ...u, email }));
   });
