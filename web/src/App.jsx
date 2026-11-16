@@ -38,9 +38,8 @@ function Login({ aoEntrar }) {
   return (
     <div className="login">
       <form className="cartao" onSubmit={entrar}>
-        <img src="/icone.png" alt="" />
+        <img src="/logo.png" alt="Hermanas Guanelianas" />
         <h1>Painel Vocacional</h1>
-        <p className="mudo" style={{ textAlign: 'center', marginTop: -8 }}>Hermanas Guanelianas</p>
         <label>E-mail</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
         <label>Senha</label>
@@ -89,7 +88,7 @@ export default function App() {
     <Sessao.Provider value={{ usuario, admin, setUsuario, atualizarContadores: () => api('/painel/dashboard?dias=7').then((d) => setContadores(d.indicadores)) }}>
       <div className="layout">
         <nav className="menu">
-          <div className="marca"><b>Vocacional</b><small>Hermanas Guanelianas</small></div>
+          <div className="marca"><img src="/logo.png" alt="Hermanas Guanelianas" /><small>Painel Vocacional</small></div>
           <NavLink to="/painel" end>Início</NavLink>
           <NavLink to="/painel/jovens">Jovens <B n={contadores.aguardando_aprovacao} /></NavLink>
           <NavLink to="/painel/grupos">Grupos</NavLink>

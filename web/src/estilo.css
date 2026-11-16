@@ -5,7 +5,7 @@ a { color: var(--azul); }
 .layout { display: flex; min-height: 100vh; }
 .menu { width: 240px; background: var(--azul); color: #fff; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
 .menu .marca { padding: 20px 18px; border-bottom: 1px solid rgba(255,255,255,.15); }
-.menu .marca b { display: block; font-size: 16px; } .menu .marca small { color: var(--dourado); }
+.menu .marca { background: #fff; text-align: center; } .menu .marca img { display: block; width: 100%; height: auto; } .menu .marca small { display: block; margin-top: 8px; color: var(--azul); font-weight: 600; }
 .menu a { color: #dfe8f5; text-decoration: none; padding: 11px 18px; display: flex; justify-content: space-between; align-items: center; }
 .menu a.active, .menu a:hover { background: rgba(255,255,255,.12); color: #fff; border-left: 3px solid var(--dourado); padding-left: 15px; }
 .menu .sair { margin-top: auto; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.15); font-size: 13px; }
@@ -42,7 +42,7 @@ textarea { min-height: 90px; resize: vertical; }
 .tag.verde { background: #e8f5ec; color: var(--verde); } .tag.ouro { background: #fdf3d0; color: #7a5c00; } .tag.cinza { background: #eee; color: #555; } .tag.vermelho { background: #fdecea; color: var(--vermelho); }
 .mudo { color: var(--cinza); font-size: 13px; }
 .login { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--azul) 0%, var(--azul-esc) 100%); }
-.login .cartao { width: 380px; padding: 30px; } .login h1 { text-align: center; } .login img { display: block; margin: 0 auto 10px; width: 72px; }
+.login .cartao { width: 380px; padding: 30px; } .login h1 { text-align: center; } .login img { display: block; margin: 0 auto 14px; width: 100%; max-width: 300px; }
 .modal-fundo { position: fixed; inset: 0; background: rgba(10,25,45,.45); display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; z-index: 10; }
 .modal { background: #fff; border-radius: 14px; padding: 22px; width: 100%; max-width: 760px; }
 .pergunta { border: 1px solid var(--borda); border-radius: 10px; padding: 12px; margin: 10px 0; background: #fbfcfe; }
