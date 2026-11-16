@@ -54,6 +54,13 @@ export default function Encontros() {
       <h1>Encontros por vídeo</h1>
       <p className="mudo">Crie um encontro e os jovens dos grupos escolhidos entram na chamada de vídeo direto pelo aplicativo. A sala abre 30 minutos antes do horário e fecha 30 minutos depois do fim. A equipe entra por aqui como moderadora (pode silenciar ou remover participantes).</p>
       {d && !d.configurado && <div className="aviso">As chamadas de vídeo ainda não foram configuradas no servidor.</div>}
+      {d?.uso?.usados != null && (
+        <div className={d.uso.usados >= d.uso.limite ? 'erro' : d.uso.usados >= d.uso.limite * 0.8 ? 'aviso' : 'mudo'}>
+          Minutos de vídeo usados neste mês: <b>{d.uso.usados.toLocaleString('pt-BR')}</b> de {d.uso.gratis.toLocaleString('pt-BR')} grátis.
+          {' '}Para nunca ser cobrado, ninguém mais entra nas salas quando chegar a {d.uso.limite.toLocaleString('pt-BR')} minutos; volta a abrir no mês seguinte.
+          {' '}Cada pessoa conectada conta 1 minuto por minuto (1 hora com 20 pessoas = 1.200 minutos).
+        </div>
+      )}
       <div className="acoes"><button onClick={abrirNovo} disabled={d && !d.configurado}>Novo encontro</button></div>
       {erro && <div className="erro">{erro}</div>}
       <table><thead><tr><th>Encontro</th><th>Quando</th><th>Para</th><th>Situação</th><th></th></tr></thead><tbody>

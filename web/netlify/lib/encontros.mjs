@@ -8,6 +8,9 @@ const TOLERANCIA_MIN = 30;
 
 export const videoConfigurado = () => !!process.env.DAILY_API_KEY;
 
+export const MINUTOS_GRATIS = 10000;
+const LIMITE_MIN = Number(process.env.VIDEO_LIMITE_MINUTOS) || 9000;
+
 async function daily(metodo, caminho, corpo) {
   if (!videoConfigurado()) falha(503, 'As chamadas de vídeo ainda não foram configuradas no servidor.');
   const r = await fetch(DAILY + caminho, {
@@ -21,6 +24,34 @@ async function daily(metodo, caminho, corpo) {
     falha(502, 'O serviço de vídeo não respondeu. Tente novamente em instantes.');
   }
   return d;
+}
+
+const inicioMes = () => {
+  const d = new Date();
+  return Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 1000);
+};
+
+let usoCache;
+export async function minutosUsadosMes() {
+  if (usoCache && Date.now() - usoCache.t < 60000) return usoCache.v;
+  const agora = Date.now() / 1000;
+  let seg = 0;
+  let depois = '';
+  for (let pagina = 0; pagina < 50; pagina++) {
+    const d = await daily('GET', `/meetings?timeframe_start=${inicioMes()}&limit=100${depois && `&starting_after=${encodeURIComponent(depois)}`}`);
+    const lista = d.data || [];
+    for (const m of lista) for (const p of m.participants || []) seg += Number(p.duration) || Math.max(0, agora - Number(p.join_time || agora));
+    if (lista.length < 100) break;
+    depois = lista[lista.length - 1].id;
+  }
+  usoCache = { t: Date.now(), v: Math.ceil(seg / 60) };
+  return usoCache.v;
+}
+
+async function exigeCota() {
+  if (await minutosUsadosMes() >= LIMITE_MIN) {
+    falha(429, 'O limite mensal de minutos de vídeo gratuitos foi atingido. As salas voltam a abrir no início do próximo mês.');
+  }
 }
 
 let tabela;
@@ -167,7 +198,8 @@ export default function (r) {
         ORDER BY e.inicio DESC`,
       [meus, u.id],
     );
-    return json({ configurado: videoConfigurado(), lista: lista.map((e) => ({ ...e, sala_url: undefined, situacao: situacao(e) })) });
+    const uso = videoConfigurado() ? await minutosUsadosMes().catch(() => null) : null;
+    return json({ configurado: videoConfigurado(), uso: { usados: uso, limite: LIMITE_MIN, gratis: MINUTOS_GRATIS }, lista: lista.map((e) => ({ ...e, sala_url: undefined, situacao: situacao(e) })) });
   });
 
   r('POST', '/painel/encontros', async ({ req, body, ip }) => {
@@ -210,6 +242,7 @@ export default function (r) {
     const e = await exigeEncontroPainel(u, params.id);
     if (situacao(e) === 'encerrado') falha(410, 'Este encontro já terminou.');
     if (!e.sala_url) falha(409, 'A sala deste encontro não foi criada.');
+    await exigeCota();
     return json({ url: e.sala_url, token: await token(e, u, true, 'pt') });
   });
 
@@ -234,6 +267,7 @@ export default function (r) {
     if (s === 'agendado') falha(409, `A sala abre ${ANTECEDENCIA_MIN} minutos antes do encontro.`);
     if (s === 'encerrado') falha(410, 'Este encontro já terminou.');
     if (!e.sala_url) falha(409, 'A sala deste encontro não foi criada.');
+    await exigeCota();
     const dono = u.papel === 'admin' || u.papel === 'responsavel';
     return json({ url: e.sala_url, token: await token(e, u, dono, body.idioma) });
   });

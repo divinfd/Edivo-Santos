@@ -64,6 +64,7 @@ const _es = <String, String>{
   'Encontro acontecendo agora': 'Encuentro en curso ahora',
   'A sala abre 30 minutos antes do encontro.': 'La sala abre 30 minutos antes del encuentro.',
   'Este encontro já terminou.': 'Este encuentro ya terminó.',
+  'O limite mensal de minutos de vídeo gratuitos foi atingido. As salas voltam a abrir no início do próximo mês.': 'Se alcanzó el límite mensual de minutos de video gratuitos. Las salas vuelven a abrir a comienzos del próximo mes.',
   'Encontro não encontrado.': 'Encuentro no encontrado.',
   'O serviço de vídeo não respondeu. Tente novamente em instantes.': 'El servicio de video no respondió. Inténtalo de nuevo en unos instantes.',
   'As chamadas de vídeo ainda não foram configuradas no servidor.': 'Las videollamadas aún no fueron configuradas en el servidor.',

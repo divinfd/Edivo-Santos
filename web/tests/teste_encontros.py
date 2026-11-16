@@ -52,6 +52,7 @@ s, r = req('POST', f"/app/encontros/{e2['id']}/entrar", {'idioma': 'pt'}, TA); o
 s, r = req('POST', f"/painel/encontros/{e1['id']}/entrar", {}, TA); ok(s == 403, 'jovem não usa a rota do painel', r)
 s, r = req('POST', f"/painel/encontros/{e1['id']}/entrar", {}, A); ok(s == 200 and r.get('token'), 'admin entra como moderador', r)
 s, r = req('GET', '/painel/encontros', tok=A); ok(s == 200 and r['configurado'] and any(x['id'] == e1['id'] for x in r['lista']), 'painel lista encontros', r)
+ok(isinstance(r.get('uso', {}).get('usados'), int) and r['uso']['limite'] == 9000, 'painel mostra minutos usados no mês', r.get('uso'))
 
 senha_resp = resp.get('senha_inicial')
 if senha_resp:
@@ -59,6 +60,11 @@ if senha_resp:
     s, r = req('GET', '/painel/encontros', tok=TR); ok(s == 200 and not any(x['id'] == e1['id'] for x in r['lista']), 'responsável de outro grupo não vê o encontro', r)
     s, r = req('POST', f"/painel/encontros/{e1['id']}/entrar", {}, TR); ok(s == 404, 'responsável de outro grupo não entra', r)
     s, r = req('DELETE', f"/painel/encontros/{e1['id']}", tok=TR); ok(s == 404, 'responsável de outro grupo não exclui', r)
+    s, et = req('POST', '/painel/encontros', {'titulo': 'Para todos ' + sfx, 'inicio': iso(5), 'duracao_min': 30, 'para_todos': True, 'grupos': [g1['id']], 'notificar': False}, A)
+    s, r = req('GET', '/painel/encontros', tok=TR); ok(any(x['id'] == et['id'] and x['grupos'] == [] for x in r['lista']), 'responsável vê encontro para todos', r)
+    s, r = req('POST', f"/painel/encontros/{et['id']}/entrar", {}, TR); ok(s == 200 and r.get('token'), 'responsável entra no encontro para todos', r)
+    s, r = req('GET', '/app/encontros', tok=TB); ok(any(x['id'] == et['id'] for x in r), 'qualquer jovem vê encontro para todos', r)
+    req('DELETE', f"/painel/encontros/{et['id']}", tok=A)
     s, r = req('POST', '/painel/encontros', {'titulo': 'R', 'inicio': iso(60), 'duracao_min': 60, 'grupos': [g1['id']]}, TR); ok(s == 400, 'responsável não cria para grupo alheio', r)
 else:
     print('AVISO responsável sem senha temporária na resposta; checagens do responsável puladas', list(resp))
