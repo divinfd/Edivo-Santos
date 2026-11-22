@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { q } from './core.mjs';
+import { traduzirVarios } from './traducao.mjs';
 
 let cache = { token: null, exp: 0 };
 
@@ -99,8 +100,16 @@ export async function notificar({ titulo, corpo, tituloEs, corpoEs, paraTodos = 
   try {
     const d = { ...dados, ...(atividadeId ? { atividade: atividadeId } : {}) };
     const { es, pt } = await separarPorIdioma(tokens);
-    const a = await enviarPush(pt, { titulo, corpo, dados: d });
-    const b = await enviarPush(es, { titulo: tituloEs || titulo, corpo: corpoEs || corpo, dados: d });
+    const textos = async (t, c, para) => {
+      const m = await traduzirVarios([t, c], para);
+      return { titulo: m.get(t) ?? t, corpo: m.get(c) ?? c };
+    };
+    const [tPt, tEs] = await Promise.all([
+      pt.length ? textos(titulo, corpo, 'pt') : null,
+      es.length ? textos(tituloEs || titulo, corpoEs || corpo, 'es') : null,
+    ]);
+    const a = await enviarPush(pt, { ...(tPt || { titulo, corpo }), dados: d });
+    const b = await enviarPush(es, { ...(tEs || { titulo, corpo }), dados: d });
     res = { dispositivos: a.dispositivos + b.dispositivos, entregues: a.entregues + b.entregues };
   } catch (e) {
     console.error('push', e);

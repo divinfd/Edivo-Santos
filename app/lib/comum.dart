@@ -77,10 +77,18 @@ class CarregadorEstado<T> extends State<Carregador<T>> {
   @override
   void initState() {
     super.initState();
+    idioma.addListener(recarregar);
     recarregar();
   }
 
+  @override
+  void dispose() {
+    idioma.removeListener(recarregar);
+    super.dispose();
+  }
+
   Future<void> recarregar() async {
+    if (!mounted) return;
     setState(() => carregando = dados == null);
     try {
       final d = await widget.carregar();

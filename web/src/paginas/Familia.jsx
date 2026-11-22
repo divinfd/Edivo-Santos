@@ -31,7 +31,7 @@ export default function Familia() {
   return (
     <>
       <h1>Família Guanelliana</h1>
-      <p className="mudo">Textos, fotos e vídeos que os jovens veem no módulo "Família Guanelliana". Escreva cada texto em português e em espanhol: o app mostra o idioma escolhido pelo jovem (sem a versão em espanhol, mostra o português). Use apenas imagens e vídeos com autorização de uso.</p>
+      <p className="mudo">Textos, fotos e vídeos que os jovens veem no módulo "Família Guanelliana". Escreva em português ou em espanhol. Se a outra versão ficar vazia, o app traduz automaticamente para o idioma escolhido pelo jovem; preencha os dois idiomas só se quiser uma tradução revisada. Use apenas imagens e vídeos com autorização de uso.</p>
       {erro && <div className="erro">{erro}</div>}
       {Object.entries(secoes).map(([k, nome]) => (
         <div key={k} className="cartao">
@@ -43,7 +43,7 @@ export default function Familia() {
             <div key={c.id} className="pergunta" style={{ display: 'flex', gap: 12 }}>
               {c.imagem_key && <img src={imagemUrl(c.imagem_key)} alt="" style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 8 }} />}
               <div style={{ flex: 1 }}>
-                <b>{c.titulo}</b> {!c.publicado && <span className="tag cinza">oculto</span>} {c.video_url && <span className="tag">vídeo</span>} {!(c.titulo_es?.trim() && c.texto_es?.trim()) && <span className="tag cinza">sem espanhol</span>}
+                <b>{c.titulo}</b> {!c.publicado && <span className="tag cinza">oculto</span>} {c.video_url && <span className="tag">vídeo</span>} {!(c.titulo_es?.trim() && c.texto_es?.trim()) && <span className="tag cinza">espanhol automático</span>}
                 <div className="mudo">{(c.texto || '').slice(0, 180)}{c.texto?.length > 180 && '...'}</div>
               </div>
               <div className="acoes" style={{ margin: 0 }}><button className="sec" onClick={() => setEd({ ...c, titulo_es: c.titulo_es || '', texto_es: c.texto_es || '', imagem_key: c.imagem_key || '', video_url: c.video_url || '' })}>Editar</button><button className="perigo" onClick={() => excluir(c)}>Excluir</button></div>

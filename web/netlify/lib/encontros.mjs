@@ -1,6 +1,7 @@
 import { db, q, q1, falha, json, autenticar, auditar, texto } from './core.mjs';
 import { gruposVisiveis } from './escopo.mjs';
 import { notificar } from './fcm.mjs';
+import { idiomaDoUsuario, traduzirCampos } from './traducao.mjs';
 
 const DAILY = 'https://api.daily.co/v1';
 const ANTECEDENCIA_MIN = 30;
@@ -272,7 +273,7 @@ export default function (r) {
     return json({ url: e.sala_url, token: await token(e, u, true, 'pt') });
   });
 
-  r('GET', '/app/encontros', async ({ req }) => {
+  r('GET', '/app/encontros', async ({ req, url }) => {
     const u = await autenticar(req);
     await garantirTabela();
     const lista = await q(
@@ -281,7 +282,7 @@ export default function (r) {
         ORDER BY e.inicio`,
       [u.id],
     );
-    return json(lista.map(publico));
+    return json(await traduzirCampos(lista.map(publico), ['titulo', 'descricao'], await idiomaDoUsuario(req, url, u)));
   });
 
   r('POST', '/app/encontros/:id/entrar', async ({ req, params, body }) => {

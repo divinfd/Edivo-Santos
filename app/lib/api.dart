@@ -71,6 +71,7 @@ class Api {
 
   static Map<String, String> get _cabecalhos => {
         'content-type': 'application/json',
+        'x-idioma': idioma.value,
         if (token != null) 'authorization': 'Bearer $token',
       };
 

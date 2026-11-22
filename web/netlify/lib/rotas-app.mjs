@@ -1,6 +1,7 @@
 import { getStore } from '@netlify/blobs';
 import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, SECOES_ES, garantirConteudoEs, CATEGORIAS, NOME_APP } from './core.mjs';
 import { mensagensComFrase } from './frases.mjs';
+import { idiomaDoUsuario, traduzirCampos, traduzirVarios } from './traducao.mjs';
 import { SQL_ATIVIDADE_VISIVEL_JOVEM, exigeAtividadeVisivelJovem } from './escopo.mjs';
 import { obterLiturgiaIdioma, dataValida, hojeBrasil } from './liturgia.mjs';
 import { notificar } from './fcm.mjs';
@@ -17,8 +18,9 @@ const JOIN_ATIVIDADE = `FROM atividades a
   LEFT JOIN respostas r ON r.atividade_id = a.id AND r.usuario_id = $1`;
 
 export default function (r) {
-  r('GET', '/app/inicio', async ({ req }) => {
+  r('GET', '/app/inicio', async ({ req, url }) => {
     const u = await autenticar(req);
+    const idioma = await idiomaDoUsuario(req, url, u);
     const c = await configCompleta();
     const novas = await q1(
       `SELECT count(*)::int AS n FROM atividades a WHERE a.status = 'publicada' AND ${SQL_ATIVIDADE_VISIVEL_JOVEM}
@@ -26,18 +28,20 @@ export default function (r) {
          AND NOT EXISTS (SELECT 1 FROM respostas rr WHERE rr.atividade_id = a.id AND rr.usuario_id = $1)`,
       [u.id],
     );
-    return json({ nome_app: NOME_APP, nome: u.nome, ...(await mensagensComFrase(c)), novas_atividades: novas.n, encontro_aberto: await encontroAberto(u.id).catch(() => null) });
+    const [mensagens, encontro] = await Promise.all([mensagensComFrase(c), encontroAberto(u.id).catch(() => null)]);
+    await traduzirCampos([encontro], ['titulo'], idioma);
+    return json({ nome_app: NOME_APP, nome: u.nome, ...mensagens, novas_atividades: novas.n, encontro_aberto: encontro });
   });
 
   r('GET', '/app/categorias', async () => json(CATEGORIAS));
 
-  r('GET', '/app/atividades', async ({ req }) => {
+  r('GET', '/app/atividades', async ({ req, url }) => {
     const u = await autenticar(req);
     const lista = await q(`SELECT ${CAMPOS_ATIVIDADE} ${JOIN_ATIVIDADE} WHERE ${SQL_ATIVIDADE_VISIVEL_JOVEM} ORDER BY a.publicar_em DESC`, [u.id]);
-    return json(lista);
+    return json(await traduzirCampos(lista, ['titulo', 'descricao'], await idiomaDoUsuario(req, url, u)));
   });
 
-  r('GET', '/app/atividades/:id', async ({ req, params }) => {
+  r('GET', '/app/atividades/:id', async ({ req, params, url }) => {
     const u = await autenticar(req);
     await exigeAtividadeVisivelJovem(u, params.id);
     const a = await q1(`SELECT ${CAMPOS_ATIVIDADE} ${JOIN_ATIVIDADE} WHERE a.id = $2`, [u.id, params.id]);
@@ -46,6 +50,16 @@ export default function (r) {
       const resp = await q1('SELECT id, enviada_em, comentario FROM respostas WHERE id = $1', [a.resposta_id]);
       resp.itens = await q('SELECT pergunta_id, valor FROM resposta_itens WHERE resposta_id = $1', [a.resposta_id]);
       a.resposta = resp;
+    }
+    const idioma = await idiomaDoUsuario(req, url, u);
+    const multiplas = a.perguntas.filter((p) => p.tipo === 'multipla');
+    const originais = new Map(multiplas.map((p) => [p.id, [...(p.opcoes || [])]]));
+    await traduzirCampos([a, ...a.perguntas], ['titulo', 'descricao', 'texto'], idioma);
+    await traduzirCampos(multiplas, ['opcoes'], idioma);
+    for (const i of a.resposta?.itens || []) {
+      const p = multiplas.find((x) => x.id === i.pergunta_id);
+      const k = p ? originais.get(p.id).indexOf(i.valor) : -1;
+      if (k >= 0) i.valor = p.opcoes[k];
     }
     return json(a);
   });
@@ -92,6 +106,14 @@ export default function (r) {
     const perguntas = await q('SELECT * FROM perguntas WHERE atividade_id = $1', [a.id]);
     const itens = new Map((Array.isArray(body.itens) ? body.itens : []).map((i) => [Number(i.pergunta_id), texto(i.valor, 8000)]));
     for (const p of perguntas) {
+      if (p.tipo === 'multipla' && itens.get(p.id) && !(p.opcoes || []).includes(itens.get(p.id))) {
+        const v = itens.get(p.id);
+        for (const para of ['pt', 'es']) {
+          const mapa = await traduzirVarios(p.opcoes || [], para);
+          const orig = (p.opcoes || []).find((o) => mapa.get(o) === v);
+          if (orig) { itens.set(p.id, orig); break; }
+        }
+      }
       const v = itens.get(p.id) || '';
       if (p.obrigatoria && !v) falha(400, `Responda: "${p.texto}"`);
       if (v && p.tipo === 'multipla' && !(p.opcoes || []).includes(v)) falha(400, `Opção inválida em "${p.texto}"`);
@@ -119,7 +141,7 @@ export default function (r) {
     return json({ ok: true, id: resp.id, enviada_em: resp.enviada_em }, 201);
   });
 
-  r('GET', '/app/respostas', async ({ req }) => {
+  r('GET', '/app/respostas', async ({ req, url }) => {
     const u = await autenticar(req);
     const lista = await q(
       `SELECT r.id, r.enviada_em, r.comentario, a.id AS atividade_id, a.titulo, a.categoria
@@ -132,6 +154,9 @@ export default function (r) {
         WHERE r.usuario_id = $1 ORDER BY p.ordem, p.id`,
       [u.id],
     );
+    const idioma = await idiomaDoUsuario(req, url, u);
+    await traduzirCampos([...lista, ...itens], ['titulo', 'pergunta'], idioma);
+    await traduzirCampos(itens.filter((i) => i.tipo === 'multipla'), ['valor'], idioma);
     for (const l of lista) l.itens = itens.filter((i) => i.resposta_id === l.id);
     return json(lista);
   });
@@ -139,11 +164,7 @@ export default function (r) {
   r('GET', '/app/liturgia', async ({ req, url }) => {
     const u = await autenticar(req);
     const iso = dataValida(url.searchParams.get('data')) || hojeBrasil();
-    let idioma = url.searchParams.get('idioma');
-    if (idioma !== 'pt' && idioma !== 'es') {
-      const d = await q1('SELECT idioma FROM dispositivos WHERE usuario_id = $1 ORDER BY atualizado_em DESC LIMIT 1', [u.id]);
-      idioma = d?.idioma === 'pt' ? 'pt' : 'es';
-    }
+    const idioma = await idiomaDoUsuario(req, url, u);
     const l = await obterLiturgiaIdioma(iso, idioma);
     if (!l) falha(503, 'Não foi possível carregar a liturgia deste dia. Tente novamente mais tarde.');
     return json(l);
@@ -151,28 +172,27 @@ export default function (r) {
 
   r('GET', '/app/familia', async ({ req, url }) => {
     const u = await autenticar(req);
-    let idioma = url.searchParams.get('idioma');
-    if (idioma !== 'pt' && idioma !== 'es') {
-      const d = await q1('SELECT idioma FROM dispositivos WHERE usuario_id = $1 ORDER BY atualizado_em DESC LIMIT 1', [u.id]);
-      idioma = d?.idioma === 'pt' ? 'pt' : 'es';
-    }
+    const idioma = await idiomaDoUsuario(req, url, u);
     await garantirConteudoEs();
     const linhas = await q('SELECT id, secao, titulo, texto, titulo_es, texto_es, imagem_key, video_url, ordem FROM conteudos WHERE publicado ORDER BY ordem, id');
     const es = idioma === 'es';
     const itens = linhas.map(({ titulo_es, texto_es, ...l }) => (es
       ? { ...l, titulo: titulo_es.trim() ? titulo_es : l.titulo, texto: texto_es.trim() ? texto_es : l.texto }
       : l));
+    await traduzirCampos(itens, ['titulo', 'texto'], idioma);
     return json(Object.entries(SECOES).map(([chave, nome]) => ({ chave, nome: es ? SECOES_ES[chave] : nome, itens: itens.filter((l) => l.secao === chave) })));
   });
 
-  r('GET', '/app/contato', async ({ req }) => {
-    await autenticar(req);
-    return json((await configCompleta()).contato);
+  r('GET', '/app/contato', async ({ req, url }) => {
+    const u = await autenticar(req);
+    const c = { ...(await configCompleta()).contato };
+    return json((await traduzirCampos([c], ['apresentacao', 'encontros'], await idiomaDoUsuario(req, url, u)))[0]);
   });
 
-  r('GET', '/app/mensagens', async ({ req }) => {
+  r('GET', '/app/mensagens', async ({ req, url }) => {
     const u = await autenticar(req);
-    return json(await q('SELECT id, tipo, texto, criado_em, resposta, respondida_em FROM mensagens WHERE usuario_id = $1 ORDER BY criado_em DESC', [u.id]));
+    const lista = await q('SELECT id, tipo, texto, criado_em, resposta, respondida_em FROM mensagens WHERE usuario_id = $1 ORDER BY criado_em DESC', [u.id]);
+    return json(await traduzirCampos(lista, ['resposta'], await idiomaDoUsuario(req, url, u)));
   });
 
   r('POST', '/app/mensagens', async ({ req, body }) => {
@@ -189,9 +209,10 @@ export default function (r) {
     return json(m, 201);
   });
 
-  r('GET', '/app/avisos', async ({ req }) => {
+  r('GET', '/app/avisos', async ({ req, url }) => {
     const u = await autenticar(req);
-    return json(
+    const idioma = await idiomaDoUsuario(req, url, u);
+    return json(await traduzirCampos(
       await q(
         `SELECT n.id, n.titulo, n.corpo, n.atividade_id, n.criada_em FROM notificacoes n
           WHERE n.criada_em > now() - interval '60 days' AND (n.para_todos OR $1 = ANY(n.usuarios)
@@ -199,7 +220,9 @@ export default function (r) {
           ORDER BY n.criada_em DESC LIMIT 50`,
         [u.id],
       ),
-    );
+      ['titulo', 'corpo'],
+      idioma,
+    ));
   });
 
   r('POST', '/app/dispositivo', async ({ req, body }) => {

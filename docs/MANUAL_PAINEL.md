@@ -21,7 +21,7 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 | **Encontros por vídeo** | Criar um encontro coletivo (título, dia e hora, duração, para todos ou grupos, notificar agora). O servidor cria uma sala privada no Daily.co; só os jovens dos grupos escolhidos entram, pelo app. A sala abre 30 minutos antes e fecha 30 minutos depois do fim; um lembrete é enviado perto do início. A equipe entra por aqui como moderadora. A tela mostra os minutos usados no mês: ao chegar a 9.000 (dos 10.000 grátis) ninguém mais entra até o mês seguinte, para nunca gerar cobrança. |
 | **Notificações** | Enviar comunicados/lembretes para todos, para grupos ou para jovens escolhidos. |
 | **Frases do dia** | Frases de São Luís Guanella (espanhol e português, com a fonte). O app mostra uma por dia abaixo da mensagem de boas-vindas. |
-| **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano, com título e texto em português e em espanhol (o app mostra o idioma escolhido pelo jovem; sem a versão em espanhol, mostra o português). Os textos iniciais são rascunhos para as irmãs revisarem. |
+| **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano, com título e texto em português e em espanhol (o app mostra o idioma escolhido pelo jovem; se um idioma ficar vazio, o app traduz automaticamente). Os textos iniciais são rascunhos para as irmãs revisarem. |
 | **Equipe** *(admin)* | Cadastrar responsáveis e administradores, definir nova senha, desativar ou **Excluir**. |
 | **Configurações** *(admin)* | Mensagem espiritual (em português e em espanhol), dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
 | **Minha conta** | Trocar o e-mail de acesso e a senha. |
@@ -41,6 +41,8 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 
 ## Idiomas do aplicativo
 - O app abre em **espanhol** (idioma principal) e o jovem pode trocar para **português** na tela de entrada ou em Minha conta → Idioma.
-- Os textos que a equipe escreve no painel (orações, perguntas, Família Guanelliana, avisos) aparecem como foram escritos.
-- As leituras da liturgia vêm da fonte brasileira, em português.
+- **Tradução automática:** tudo que a equipe escreve no painel (orações e atividades, perguntas e opções, Família Guanelliana, avisos, respostas às mensagens, encontros, mensagem de boas-vindas, frases do dia e contato) pode ser escrito em português **ou** em espanhol. O servidor traduz sozinho para o idioma escolhido pelo jovem, nos dois sentidos. Onde o painel tem campos para os dois idiomas (Família, Frases, Configurações), o texto preenchido à mão tem prioridade sobre a tradução automática.
+- A tradução é automática (serviço MyMemory, gratuito até 50.000 caracteres por dia) e fica guardada no servidor: cada texto é traduzido uma vez só. Se o serviço estiver fora do ar, o app mostra o texto como foi escrito e tenta de novo no próximo acesso. Textos muito curtos ou só com nomes próprios podem ficar sem tradução.
+- As mensagens e respostas escritas pelos jovens aparecem para a equipe como foram escritas.
+- A liturgia em espanhol vem da fonte "Evangelio del día"; em português, da fonte brasileira.
 - As notificações automáticas (nova oração, resposta da equipe) chegam no idioma escolhido no celular.
