@@ -21,7 +21,7 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 | **Encontros por vídeo** | Criar um encontro coletivo (título, dia e hora, duração, para todos ou grupos, notificar agora). O servidor cria uma sala privada no Daily.co; só os jovens dos grupos escolhidos entram, pelo app. A sala abre 30 minutos antes e fecha 30 minutos depois do fim; um lembrete é enviado perto do início. A equipe entra por aqui como moderadora. A tela mostra os minutos usados no mês: ao chegar a 9.000 (dos 10.000 grátis) ninguém mais entra até o mês seguinte, para nunca gerar cobrança. |
 | **Notificações** | Enviar comunicados/lembretes para todos, para grupos ou para jovens escolhidos. |
 | **Frases do dia** | Frases de São Luís Guanella (espanhol e português, com a fonte). O app mostra uma por dia abaixo da mensagem de boas-vindas. |
-| **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano. Os textos iniciais são rascunhos para as irmãs revisarem. |
+| **Família Guanelliana** | Textos, fotos e vídeos das seções São Luís Guanella, A Congregação, A Clara Providência e Carisma Guanelliano, com título e texto em português e em espanhol (o app mostra o idioma escolhido pelo jovem; sem a versão em espanhol, mostra o português). Os textos iniciais são rascunhos para as irmãs revisarem. |
 | **Equipe** *(admin)* | Cadastrar responsáveis e administradores, definir nova senha, desativar ou **Excluir**. |
 | **Configurações** *(admin)* | Mensagem espiritual (em português e em espanhol), dados de contato do responsável (telefone, WhatsApp, e-mail, encontros), categorias. |
 | **Minha conta** | Trocar o e-mail de acesso e a senha. |
