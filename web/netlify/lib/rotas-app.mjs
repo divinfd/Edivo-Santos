@@ -159,7 +159,9 @@ export default function (r) {
     await garantirConteudoEs();
     const linhas = await q('SELECT id, secao, titulo, texto, titulo_es, texto_es, imagem_key, video_url, ordem FROM conteudos WHERE publicado ORDER BY ordem, id');
     const es = idioma === 'es';
-    const itens = linhas.map(({ titulo_es, texto_es, ...l }) => (es && titulo_es.trim() ? { ...l, titulo: titulo_es, texto: texto_es.trim() ? texto_es : l.texto } : l));
+    const itens = linhas.map(({ titulo_es, texto_es, ...l }) => (es
+      ? { ...l, titulo: titulo_es.trim() ? titulo_es : l.titulo, texto: texto_es.trim() ? texto_es : l.texto }
+      : l));
     return json(Object.entries(SECOES).map(([chave, nome]) => ({ chave, nome: es ? SECOES_ES[chave] : nome, itens: itens.filter((l) => l.secao === chave) })));
   });
 
