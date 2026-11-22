@@ -66,23 +66,25 @@ function pedacos(t) {
   return out;
 }
 
-async function chamarApi(t, de, para) {
+async function chamarApi(t, de, para, limite) {
+  const resta = limite - Date.now();
+  if (resta < 500) throw new Error('tradução: sem tempo');
   const p = new URLSearchParams({ q: t, langpair: `${de}|${para === 'pt' ? 'pt-BR' : 'es-ES'}` });
   if (process.env.TRADUCAO_EMAIL) p.set('de', process.env.TRADUCAO_EMAIL);
-  const r = await fetch(`${API}?${p}`, { signal: AbortSignal.timeout(PRAZO_MS) });
+  const r = await fetch(`${API}?${p}`, { signal: AbortSignal.timeout(resta) });
   const d = await r.json();
   if (!r.ok || Number(d.responseStatus) !== 200 || d.quotaFinished || !d.responseData?.translatedText) throw new Error(`tradução ${d.responseStatus}: ${d.responseDetails || ''}`);
   return desfazer(d.responseData.translatedText);
 }
 
-async function traduzirLongo(t, de, para) {
+async function traduzirLongo(t, de, para, limite) {
   const linhas = t.split('\n');
   const out = [];
   for (const linha of linhas) {
     const m = linha.match(/^(\s*(?:[•\-*]|\d+[.)])?\s*)(.*?)(\s*)$/);
     if (!m[2] || idiomaDoTexto(m[2]) === null && !/\p{L}{3}/u.test(m[2])) { out.push(linha); continue; }
     let r = '';
-    for (const p of pedacos(m[2])) r += (r && !/\s$/.test(r) ? ' ' : '') + (await chamarApi(p.trim(), de, para));
+    for (const p of pedacos(m[2])) r += (r && !/\s$/.test(r) ? ' ' : '') + (await chamarApi(p.trim(), de, para, limite));
     out.push(m[1] + r + m[3]);
   }
   return out.join('\n');
@@ -108,7 +110,7 @@ export async function traduzirVarios(textos, para, prazoMs = PRAZO_MS) {
     for (let i = 0; i < faltam.length && Date.now() < limite; i += LOTE) {
       await Promise.all(faltam.slice(i, i + LOTE).map(async (t) => {
         try {
-          const tr = await traduzirLongo(t, outro, para);
+          const tr = await traduzirLongo(t, outro, para, limite);
           mapa.set(t, tr);
           await q('INSERT INTO traducoes (hash, para, texto) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', [hash(t), para, tr]);
         } catch (e) {
