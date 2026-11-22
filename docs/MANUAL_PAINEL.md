@@ -41,8 +41,8 @@ O servidor confere essas permissões em cada pedido; não depende só do que apa
 
 ## Idiomas do aplicativo
 - O app abre em **espanhol** (idioma principal) e o jovem pode trocar para **português** na tela de entrada ou em Minha conta → Idioma.
-- **Tradução automática:** tudo que a equipe escreve no painel (orações e atividades, perguntas e opções, Família Guanelliana, avisos, respostas às mensagens, encontros, mensagem de boas-vindas, frases do dia e contato) pode ser escrito em português **ou** em espanhol. O servidor traduz sozinho para o idioma escolhido pelo jovem, nos dois sentidos. Onde o painel tem campos para os dois idiomas (Família, Frases, Configurações), o texto preenchido à mão tem prioridade sobre a tradução automática.
+- **Tradução automática:** tudo que a equipe escreve no painel (orações e atividades, perguntas e opções, Família Guanelliana, avisos, encontros, mensagem de boas-vindas, frases do dia e contato) pode ser escrito em português **ou** em espanhol. O servidor traduz sozinho para o idioma escolhido pelo jovem, nos dois sentidos. Onde o painel tem campos para os dois idiomas (Família, Frases, Configurações), o texto preenchido à mão tem prioridade sobre a tradução automática.
 - A tradução é automática (serviço MyMemory, gratuito até 50.000 caracteres por dia) e fica guardada no servidor: cada texto é traduzido uma vez só. Se o serviço estiver fora do ar, o app mostra o texto como foi escrito e tenta de novo no próximo acesso. Textos muito curtos ou só com nomes próprios podem ficar sem tradução.
-- As mensagens e respostas escritas pelos jovens aparecem para a equipe como foram escritas.
+- As mensagens particulares (dos jovens e as respostas da equipe) não são traduzidas, para que esses textos não saiam do servidor.
 - A liturgia em espanhol vem da fonte "Evangelio del día"; em português, da fonte brasileira.
 - As notificações automáticas (nova oração, resposta da equipe) chegam no idioma escolhido no celular.
