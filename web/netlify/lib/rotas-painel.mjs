@@ -915,7 +915,7 @@ export default function (r) {
     const t = texto(body.resposta, 4000);
     if (!t) falha(400, 'Escreva a resposta.');
     await q('UPDATE mensagens SET resposta = $1, respondida_em = now(), respondida_por = $2 WHERE id = $3', [t, u.id, m.id]);
-    await notificar({ titulo: 'Você recebeu uma resposta', tituloEs: 'Recibiste una respuesta', corpo: t.length > 120 ? t.slice(0, 117) + '...' : t, usuarios: [m.usuario_id], autor: u, dados: { tipo: 'mensagem' } });
+    await notificar({ titulo: 'Você recebeu uma resposta', tituloEs: 'Recibiste una respuesta', corpo: t.length > 120 ? t.slice(0, 117) + '...' : t, usuarios: [m.usuario_id], autor: u, dados: { tipo: 'mensagem' }, traduzir: false });
     await auditar(u, 'mensagem_respondida', { mensagem: m.id }, ip);
     return json({ ok: true });
   });

@@ -189,10 +189,9 @@ export default function (r) {
     return json((await traduzirCampos([c], ['apresentacao', 'encontros'], await idiomaDoUsuario(req, url, u)))[0]);
   });
 
-  r('GET', '/app/mensagens', async ({ req, url }) => {
+  r('GET', '/app/mensagens', async ({ req }) => {
     const u = await autenticar(req);
-    const lista = await q('SELECT id, tipo, texto, criado_em, resposta, respondida_em FROM mensagens WHERE usuario_id = $1 ORDER BY criado_em DESC', [u.id]);
-    return json(await traduzirCampos(lista, ['resposta'], await idiomaDoUsuario(req, url, u)));
+    return json(await q('SELECT id, tipo, texto, criado_em, resposta, respondida_em FROM mensagens WHERE usuario_id = $1 ORDER BY criado_em DESC', [u.id]));
   });
 
   r('POST', '/app/mensagens', async ({ req, body }) => {

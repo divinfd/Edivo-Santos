@@ -94,14 +94,14 @@ async function separarPorIdioma(tokens) {
   return { es: tokens.filter((t) => !pt.has(t)), pt: tokens.filter((t) => pt.has(t)) };
 }
 
-export async function notificar({ titulo, corpo, tituloEs, corpoEs, paraTodos = false, grupos = [], usuarios = [], atividadeId = null, autor = null, dados = {} }) {
+export async function notificar({ titulo, corpo, tituloEs, corpoEs, paraTodos = false, grupos = [], usuarios = [], atividadeId = null, autor = null, dados = {}, traduzir = true }) {
   const tokens = await tokensDestino({ paraTodos, grupos, usuarios });
   let res = { dispositivos: tokens.length, entregues: 0 };
   try {
     const d = { ...dados, ...(atividadeId ? { atividade: atividadeId } : {}) };
     const { es, pt } = await separarPorIdioma(tokens);
     const textos = async (t, c, para) => {
-      const m = await traduzirVarios([t, c], para);
+      const m = traduzir ? await traduzirVarios([t, c], para) : new Map();
       return { titulo: m.get(t) ?? t, corpo: m.get(c) ?? c };
     };
     const [tPt, tEs] = await Promise.all([
