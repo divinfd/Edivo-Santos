@@ -146,6 +146,8 @@ CREATE TABLE IF NOT EXISTS conteudos (
   video_url TEXT,
   ordem INT NOT NULL DEFAULT 0,
   publicado BOOLEAN NOT NULL DEFAULT true,
+  titulo_es TEXT NOT NULL DEFAULT '',
+  texto_es TEXT NOT NULL DEFAULT '',
   atualizado_em TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

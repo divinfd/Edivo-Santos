@@ -31,22 +31,22 @@ export default function Familia() {
   return (
     <>
       <h1>Família Guanelliana</h1>
-      <p className="mudo">Textos, fotos e vídeos que os jovens veem no módulo "Família Guanelliana". Use apenas imagens e vídeos com autorização de uso.</p>
+      <p className="mudo">Textos, fotos e vídeos que os jovens veem no módulo "Família Guanelliana". Escreva cada texto em português e em espanhol: o app mostra o idioma escolhido pelo jovem (sem a versão em espanhol, mostra o português). Use apenas imagens e vídeos com autorização de uso.</p>
       {erro && <div className="erro">{erro}</div>}
       {Object.entries(secoes).map(([k, nome]) => (
         <div key={k} className="cartao">
           <div className="acoes" style={{ justifyContent: 'space-between', margin: 0 }}>
             <h2 style={{ margin: 0 }}>{nome}</h2>
-            <button className="sec" onClick={() => setEd({ secao: k, titulo: '', texto: '', imagem_key: '', video_url: '', ordem: (lista || []).filter((c) => c.secao === k).length, publicado: true })}>+ Adicionar texto</button>
+            <button className="sec" onClick={() => setEd({ secao: k, titulo: '', texto: '', titulo_es: '', texto_es: '', imagem_key: '', video_url: '', ordem: (lista || []).filter((c) => c.secao === k).length, publicado: true })}>+ Adicionar texto</button>
           </div>
           {(lista || []).filter((c) => c.secao === k).map((c) => (
             <div key={c.id} className="pergunta" style={{ display: 'flex', gap: 12 }}>
               {c.imagem_key && <img src={imagemUrl(c.imagem_key)} alt="" style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 8 }} />}
               <div style={{ flex: 1 }}>
-                <b>{c.titulo}</b> {!c.publicado && <span className="tag cinza">oculto</span>} {c.video_url && <span className="tag">vídeo</span>}
+                <b>{c.titulo}</b> {!c.publicado && <span className="tag cinza">oculto</span>} {c.video_url && <span className="tag">vídeo</span>} {!c.titulo_es?.trim() && <span className="tag cinza">sem espanhol</span>}
                 <div className="mudo">{(c.texto || '').slice(0, 180)}{c.texto?.length > 180 && '...'}</div>
               </div>
-              <div className="acoes" style={{ margin: 0 }}><button className="sec" onClick={() => setEd({ ...c, imagem_key: c.imagem_key || '', video_url: c.video_url || '' })}>Editar</button><button className="perigo" onClick={() => excluir(c)}>Excluir</button></div>
+              <div className="acoes" style={{ margin: 0 }}><button className="sec" onClick={() => setEd({ ...c, titulo_es: c.titulo_es || '', texto_es: c.texto_es || '', imagem_key: c.imagem_key || '', video_url: c.video_url || '' })}>Editar</button><button className="perigo" onClick={() => excluir(c)}>Excluir</button></div>
             </div>
           ))}
         </div>
@@ -58,8 +58,10 @@ export default function Familia() {
             <div><label>Seção</label><select value={ed.secao} onChange={(e) => setEd({ ...ed, secao: e.target.value })}>{Object.entries(secoes).map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></div>
             <div><label>Ordem</label><input type="number" value={ed.ordem} onChange={(e) => setEd({ ...ed, ordem: Number(e.target.value) })} /></div>
           </div>
-          <label>Título</label><input value={ed.titulo} onChange={(e) => setEd({ ...ed, titulo: e.target.value })} />
-          <label>Texto</label><textarea style={{ minHeight: 220 }} value={ed.texto} onChange={(e) => setEd({ ...ed, texto: e.target.value })} />
+          <label>Título (português)</label><input value={ed.titulo} onChange={(e) => setEd({ ...ed, titulo: e.target.value })} />
+          <label>Texto (português)</label><textarea style={{ minHeight: 180 }} value={ed.texto} onChange={(e) => setEd({ ...ed, texto: e.target.value })} />
+          <label>Título (espanhol)</label><input value={ed.titulo_es} onChange={(e) => setEd({ ...ed, titulo_es: e.target.value })} />
+          <label>Texto (espanhol)</label><textarea style={{ minHeight: 180 }} value={ed.texto_es} onChange={(e) => setEd({ ...ed, texto_es: e.target.value })} />
           <label>Fotografia</label>
           {ed.imagem_key && <div><img src={imagemUrl(ed.imagem_key)} alt="" style={{ maxWidth: 200, borderRadius: 8 }} /><br /><button className="link" onClick={() => setEd({ ...ed, imagem_key: '' })}>remover</button></div>}
           <input type="file" accept="image/*" onChange={imagem} />

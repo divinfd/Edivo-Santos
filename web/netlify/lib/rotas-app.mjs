@@ -1,5 +1,5 @@
 import { getStore } from '@netlify/blobs';
-import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, CATEGORIAS, NOME_APP } from './core.mjs';
+import { q, q1, falha, json, binario, autenticar, texto, configCompleta, SECOES, SECOES_ES, garantirConteudoEs, CATEGORIAS, NOME_APP } from './core.mjs';
 import { mensagensComFrase } from './frases.mjs';
 import { SQL_ATIVIDADE_VISIVEL_JOVEM, exigeAtividadeVisivelJovem } from './escopo.mjs';
 import { obterLiturgiaIdioma, dataValida, hojeBrasil } from './liturgia.mjs';
@@ -149,10 +149,18 @@ export default function (r) {
     return json(l);
   });
 
-  r('GET', '/app/familia', async ({ req }) => {
-    await autenticar(req);
-    const linhas = await q('SELECT id, secao, titulo, texto, imagem_key, video_url, ordem FROM conteudos WHERE publicado ORDER BY ordem, id');
-    return json(Object.entries(SECOES).map(([chave, nome]) => ({ chave, nome, itens: linhas.filter((l) => l.secao === chave) })));
+  r('GET', '/app/familia', async ({ req, url }) => {
+    const u = await autenticar(req);
+    let idioma = url.searchParams.get('idioma');
+    if (idioma !== 'pt' && idioma !== 'es') {
+      const d = await q1('SELECT idioma FROM dispositivos WHERE usuario_id = $1 ORDER BY atualizado_em DESC LIMIT 1', [u.id]);
+      idioma = d?.idioma === 'pt' ? 'pt' : 'es';
+    }
+    await garantirConteudoEs();
+    const linhas = await q('SELECT id, secao, titulo, texto, titulo_es, texto_es, imagem_key, video_url, ordem FROM conteudos WHERE publicado ORDER BY ordem, id');
+    const es = idioma === 'es';
+    const itens = linhas.map(({ titulo_es, texto_es, ...l }) => (es && titulo_es.trim() ? { ...l, titulo: titulo_es, texto: texto_es.trim() ? texto_es : l.texto } : l));
+    return json(Object.entries(SECOES).map(([chave, nome]) => ({ chave, nome: es ? SECOES_ES[chave] : nome, itens: itens.filter((l) => l.secao === chave) })));
   });
 
   r('GET', '/app/contato', async ({ req }) => {

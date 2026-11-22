@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 import {
   q, q1, falha, json, binario, autenticar, auditar, texto, emailValido, hashSenha, validarSenha, senhaTemporaria,
-  configCompleta, setConfig, CATEGORIAS, SECOES, CONFIG_PADRAO,
+  configCompleta, setConfig, CATEGORIAS, SECOES, garantirConteudoEs, CONFIG_PADRAO,
 } from './core.mjs';
 import { jovensVisiveis, gruposVisiveis, exigeJovemVisivel, exigeAtividadePainel, SQL_JOVEM_ELEGIVEL } from './escopo.mjs';
 import { notificar, fcmConfigurado } from './fcm.mjs';
@@ -739,6 +739,7 @@ export default function (r) {
   // ---------- FAMÍLIA GUANELLIANA ----------
   r('GET', '/painel/conteudos', async ({ req }) => {
     await equipe(req);
+    await garantirConteudoEs();
     return json(await q('SELECT * FROM conteudos ORDER BY secao, ordem, id'));
   });
 
@@ -749,12 +750,14 @@ export default function (r) {
     if (!titulo) falha(400, 'Informe o título.');
     let video = texto(body.video_url, 500) || null;
     if (video && !/^https:\/\/(www\.)?(youtube\.com|youtu\.be|vimeo\.com)\//i.test(video)) falha(400, 'Use um link de vídeo do YouTube ou Vimeo.');
-    const vals = [secao, titulo, texto(body.texto, 50000), texto(body.imagem_key, 200) || null, video, Number(body.ordem) || 0, body.publicado !== false];
+    const vals = [secao, titulo, texto(body.texto, 50000), texto(body.imagem_key, 200) || null, video, Number(body.ordem) || 0, body.publicado !== false,
+      texto(body.titulo_es, 200), texto(body.texto_es, 50000)];
+    await garantirConteudoEs();
     if (id) {
-      await q('UPDATE conteudos SET secao=$1, titulo=$2, texto=$3, imagem_key=$4, video_url=$5, ordem=$6, publicado=$7, atualizado_em=now() WHERE id=$8', [...vals, id]);
+      await q('UPDATE conteudos SET secao=$1, titulo=$2, texto=$3, imagem_key=$4, video_url=$5, ordem=$6, publicado=$7, titulo_es=$8, texto_es=$9, atualizado_em=now() WHERE id=$10', [...vals, id]);
       return id;
     }
-    return (await q1('INSERT INTO conteudos (secao, titulo, texto, imagem_key, video_url, ordem, publicado) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id', vals)).id;
+    return (await q1('INSERT INTO conteudos (secao, titulo, texto, imagem_key, video_url, ordem, publicado, titulo_es, texto_es) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id', vals)).id;
   }
 
   r('POST', '/painel/conteudos', async ({ req, body, ip }) => {

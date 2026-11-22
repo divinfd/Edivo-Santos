@@ -163,6 +163,21 @@ export const SECOES = {
   carisma: 'Carisma Guanelliano',
 };
 
+export const SECOES_ES = {
+  guanella: 'San Luis Guanella',
+  congregacao: 'La Congregación',
+  providencia: 'La Clara Providencia',
+  carisma: 'Carisma Guaneliano',
+};
+
+let colunasConteudoEs;
+export function garantirConteudoEs() {
+  colunasConteudoEs ||= q(`ALTER TABLE conteudos ADD COLUMN IF NOT EXISTS titulo_es TEXT NOT NULL DEFAULT '',
+      ADD COLUMN IF NOT EXISTS texto_es TEXT NOT NULL DEFAULT ''`)
+    .catch((e) => { colunasConteudoEs = null; throw e; });
+  return colunasConteudoEs;
+}
+
 export const NOME_APP = 'Vocacional Hermanas Guanelianas';
 
 export const CONFIG_PADRAO = {

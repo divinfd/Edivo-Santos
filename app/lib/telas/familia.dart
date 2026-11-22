@@ -14,7 +14,7 @@ class TelaFamilia extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: Text(tr('Família Guanelliana'))),
         body: Carregador<List>(
-          carregar: () async => List.from(await Api.get('/app/familia')),
+          carregar: () async => List.from(await Api.get('/app/familia?idioma=${idioma.value}')),
           construir: (context, secoes, _) => ListView(padding: const EdgeInsets.all(16), children: [
             for (final s in secoes)
               Card(
