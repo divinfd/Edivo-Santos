@@ -102,7 +102,7 @@ const _es = <String, String>{
   'Excluir': 'Eliminar',
   'Pedido registrado.': 'Solicitud registrada.',
   'OK': 'OK',
-  'Vocacional Hermanas Guanelianas · versão 1.0.0': 'Vocacional Hermanas Guanelianas · versión 1.0.0',
+  'Vocacional Hermanas Guanelianas · versão 1.1.0': 'Vocacional Hermanas Guanelianas · versión 1.1.0',
   // contato
   'Dúvida': 'Duda',
   'Orientação vocacional': 'Orientación vocacional',

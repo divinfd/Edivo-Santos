@@ -151,7 +151,7 @@ class _TelaContaEstado extends State<TelaConta> {
           ]),
         ),
         const SizedBox(height: 16),
-        Text(tr('Vocacional Hermanas Guanelianas · versão 1.0.0'), textAlign: TextAlign.center, style: TextStyle(color: Colors.black45)),
+        Text(tr('Vocacional Hermanas Guanelianas · versão 1.1.0'), textAlign: TextAlign.center, style: TextStyle(color: Colors.black45)),
       ]),
     );
   }
